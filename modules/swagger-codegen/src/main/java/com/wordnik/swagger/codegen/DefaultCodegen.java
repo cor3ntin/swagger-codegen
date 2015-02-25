@@ -562,7 +562,7 @@ public class DefaultCodegen {
     op.notes = escapeText(operation.getDescription());
     op.tags = operation.getTags();
 
-    Response methodResponse = null;
+    CodegenResponse methodResponse = null;
 
     if(operation.getConsumes() != null && operation.getConsumes().size() > 0) {
       List<Map<String, String>> c = new ArrayList<Map<String, String>>();
@@ -594,75 +594,36 @@ public class DefaultCodegen {
       op.hasProduces = true;
     }
 
+    Boolean methodSelectedIsDefault = Boolean.FALSE;
     if(operation.getResponses() != null) {
       for(String responseCode: new TreeSet<String>(operation.getResponses().keySet())) {
         Response response = operation.getResponses().get(responseCode);
-        if (responseCode.startsWith("2")) {
-          // use the first, i.e. the smallest 2xx response status as methodResponse
-          methodResponse = response;
-          break;
+
+        CodegenResponse r = fromResponse(responseCode, response, imports);
+        op.responses.add(r);
+
+        if (responseCode.startsWith("2") && (methodSelectedIsDefault || methodResponse == null))
+          methodResponse = r;
+        else if (responseCode.equals("default") && methodResponse == null) {
+          methodSelectedIsDefault = true;
+          methodResponse = r;
         }
       }
-      if(methodResponse == null && operation.getResponses().keySet().contains("default")) {
-        methodResponse = operation.getResponses().get("default");
-      }
-      for(String responseCode: operation.getResponses().keySet()) {
-        Response response = operation.getResponses().get(responseCode);
-        if(response != methodResponse) {
-          CodegenResponse r = fromResponse(responseCode, response);
-          op.responses.add(r);
-        }
-        for(int i = 0; i < op.responses.size() - 1; i++) {
-          CodegenResponse r = op.responses.get(i);
-          r.hasMore = new Boolean(true);
-        }
+      for(int i = 0; i < op.responses.size() - 1; i++) {
+        CodegenResponse r = op.responses.get(i);
+        r.hasMore = new Boolean(true);
       }
     }
 
     if(methodResponse != null) {
-     if (methodResponse.getSchema() != null) {
-      CodegenProperty cm = fromProperty("response", methodResponse.getSchema());
-
-      Property responseProperty = methodResponse.getSchema();
-
-      if(responseProperty instanceof ArrayProperty) {
-        ArrayProperty ap = (ArrayProperty) responseProperty;
-        CodegenProperty innerProperty = fromProperty("response", ap.getItems());
-        op.returnBaseType = innerProperty.baseType;
-      }
-      else {
-        if(cm.complexType != null)
-          op.returnBaseType = cm.complexType;
-        else
-          op.returnBaseType = cm.baseType;
-      }
-      op.examples = toExamples(methodResponse.getExamples());
-      op.defaultResponse = toDefaultValue(responseProperty);
-      op.returnType = cm.datatype;
-      if(cm.isContainer != null) {
-        op.returnContainer = cm.containerType;
-        if("map".equals(cm.containerType))
-          op.isMapContainer = Boolean.TRUE;
-        else if ("list".equalsIgnoreCase(cm.containerType))
-          op.isListContainer = Boolean.TRUE;
-      }
-      else
-        op.returnSimpleType = true;
-      if (languageSpecificPrimitives().contains(op.returnBaseType) || op.returnBaseType == null)
-        op.returnTypeIsPrimitive = true;
-     }
-     addHeaders(methodResponse, op.responseHeaders);
+      op.returnType = methodResponse.dataType;
+      op.returnBaseType = methodResponse.baseType;
+      op.returnContainer = methodResponse.containerType;
+      op.returnSimpleType = methodResponse.simpleType;
+      op.returnTypeIsPrimitive = methodResponse.primitiveType;
+      op.isListContainer = methodResponse.isListContainer;
+      op.isMapContainer = methodResponse.isMapContainer;
     }
-
-    if(op.returnBaseType == null) {
-      op.returnTypeIsPrimitive = true;
-      op.returnSimpleType = true;
-    }
-
-    if(op.returnBaseType != null &&
-      !defaultIncludes.contains(op.returnBaseType) &&
-      !languageSpecificPrimitives.contains(op.returnBaseType))
-      imports.add(op.returnBaseType);
 
     List<Parameter> parameters = operation.getParameters();
     CodegenParameter bodyParam = null;
@@ -734,7 +695,7 @@ public class DefaultCodegen {
     return op;
   }
 
-  public CodegenResponse fromResponse(String responseCode, Response response) {
+  public CodegenResponse fromResponse(String responseCode, Response response, Set<String> imports) {
     CodegenResponse r = CodegenModelFactory.newInstance(CodegenModelType.RESPONSE);
     if("default".equals(responseCode))
       r.code = "0";
@@ -743,6 +704,38 @@ public class DefaultCodegen {
     r.message = response.getDescription();
     r.schema = response.getSchema();
     r.examples = toExamples(response.getExamples());
+
+    CodegenProperty cm = fromProperty("response", response.getSchema());
+    Property responseProperty = response.getSchema();
+    if(responseProperty instanceof ArrayProperty) {
+      ArrayProperty ap = (ArrayProperty) responseProperty;
+      CodegenProperty innerProperty = fromProperty("response", ap.getItems());
+      r.baseType = innerProperty.baseType;
+    }
+    else if(cm != null ){
+        if(cm.complexType != null)
+            r.baseType = cm.complexType;
+        else
+            r.baseType = cm.baseType;
+    }
+    if(cm != null ) {
+      r.dataType = cm.datatype;
+      if (cm.isContainer != null) {
+        r.containerType = cm.containerType;
+        if ("map".equals(cm.containerType))
+          r.isMapContainer = Boolean.TRUE;
+        else if ("list".equalsIgnoreCase(cm.containerType))
+          r.isListContainer = Boolean.TRUE;
+      } else
+        r.simpleType = true;
+    }
+
+    if (languageSpecificPrimitives().contains(r.baseType) || r.baseType == null)
+      r.primitiveType = true;
+    else if(!defaultIncludes.contains(r.baseType)) {
+      imports.add(r.baseType);
+    }
+
     return r;
   }
 

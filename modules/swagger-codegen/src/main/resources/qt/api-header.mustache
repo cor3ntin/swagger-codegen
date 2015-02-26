@@ -42,14 +42,15 @@ class {{nickname}}Response : public AbstractResponse {
 
 public:
     {{nickname}}Response(QNetworkReply* reply, AbstractApiInvoker* invoker);
-{{#responses}}    {{nickname}}Response* on(const std::function<void({{{dataType}}})> & callback);
+    {{nickname}}Response* onEmptyResponse(std::function<void(int)>);
+{{#responses}}{{#dataType}}    {{nickname}}Response* on(const std::function<void({{{dataType}}})> & callback);{{/dataType}}
 {{/responses}}
 
 protected:
     bool processResponse(int status, const QJsonValue & data);
 
 private:
-{{#responses}}    std::function<void({{{dataType}}})> m_{{code}}_fun;
+{{#responses}}{{#dataType}}    std::function<void({{{dataType}}})> m_{{code}}_fun;{{/dataType}}
 {{/responses}}
 };
 

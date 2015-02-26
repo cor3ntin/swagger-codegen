@@ -43,6 +43,11 @@ bool AbstractResponse::success() const {
         && s >= 200 && s< 300;
 }
 
+AbstractResponse* AbstractResponse::onEmptyResponse(std::function<void(int)> fun) {
+    m_empty_response_function = fun;
+    return this;
+}
+
 void AbstractResponse::onReplyFinished() {
     bool hasError = false;
     QJsonDocument doc;

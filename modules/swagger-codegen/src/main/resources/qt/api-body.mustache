@@ -18,6 +18,11 @@ namespace responses {
     : AbstractResponse(reply, invoker) {
 }
 
+{{nickname}}Response* {{nickname}}Response::onEmptyResponse(std::function<void(int)> fun) {
+    AbstractResponse::onEmptyResponse(fun);
+    return this;
+}
+
 {{#responses}}
 {{nickname}}Response* {{nickname}}Response::on(const std::function<void({{{dataType}}})> & callback) {
     m_{{code}}_fun = callback;
@@ -32,7 +37,7 @@ bool {{nickname}}Response::processResponse(int status, const QJsonValue & data) 
         callbackId = 0;
 
     switch(callbackId) { {{#responses}}
-        case {{code}}: { //{{{dataType}}}
+        case {{code}}: { //{{{dataType}}}{{#dataType}}
             if(!m_{{code}}_fun) {
                 logSwaggerWarning("No callback defined for {{{dataType}}} - http status: %d", status);
                 return true;
@@ -43,6 +48,8 @@ bool {{nickname}}Response::processResponse(int status, const QJsonValue & data) 
                 return false;
             }
             m_{{code}}_fun(*value);
+            {{/dataType}}{{^dataType}}if(m_empty_response_function)
+                m_empty_response_function(status);{{/dataType}}
         }{{/responses}}
         default:
             Q_ASSERT(false);

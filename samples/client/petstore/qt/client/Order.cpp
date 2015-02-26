@@ -1,0 +1,131 @@
+#include "Order.h"
+#include <QJsonObject>
+#include <QMetaEnum>
+
+namespace swagger {
+
+
+
+Order::Order(qint64 id,
+        qint64 petId,
+        qint32 quantity,
+        const QDateTime& shipDate,
+        Status status,
+        bool complete) {
+
+    setId(id);
+    setPetId(petId);
+    setQuantity(quantity);
+    setShipDate(shipDate);
+    setStatus(status);
+    setComplete(complete);
+}
+
+
+qint64 Order::id() const {
+    return m_id;
+}
+
+void  Order::setId(qint64 id) {
+    m_id = id;
+}
+
+qint64 Order::petId() const {
+    return m_petId;
+}
+
+void  Order::setPetId(qint64 petId) {
+    m_petId = petId;
+}
+
+qint32 Order::quantity() const {
+    return m_quantity;
+}
+
+void  Order::setQuantity(qint32 quantity) {
+    m_quantity = quantity;
+}
+
+QDateTime Order::shipDate() const {
+    return m_shipDate;
+}
+
+void  Order::setShipDate(const QDateTime& shipDate) {
+    m_shipDate = shipDate;
+}
+
+Order::Status Order::status() const {
+    return m_status;
+}
+
+void  Order::setStatus(Status status) {
+    m_status = status;
+}
+
+bool Order::complete() const {
+    return m_complete;
+}
+
+void  Order::setComplete(bool complete) {
+    m_complete = complete;
+}
+
+
+
+QJsonObject Order::serialize() const {
+    QJsonObject json;
+
+    
+    
+    json.insert("id", swagger::serialize(m_id));
+    
+    
+    json.insert("petId", swagger::serialize(m_petId));
+    
+    
+    json.insert("quantity", swagger::serialize(m_quantity));
+    
+    
+    json.insert("shipDate", swagger::serialize(m_shipDate));
+    
+    json.insert("status", SWAGGER_SERIALIZE_QENUM(Order, Status, m_status));
+    
+    
+    
+    json.insert("complete", swagger::serialize(m_complete));
+    
+    return json;
+}
+
+boost::optional<Order> Order::unserialize(const QJsonObject & json) {
+    auto it = json.end();
+    Order obj;
+    if((it = json.find("id")) != std::end(json)) {
+        auto v = swagger::unserialize<qint64>(*it);
+        if(v) obj.setId(*v);
+    }
+    if((it = json.find("petId")) != std::end(json)) {
+        auto v = swagger::unserialize<qint64>(*it);
+        if(v) obj.setPetId(*v);
+    }
+    if((it = json.find("quantity")) != std::end(json)) {
+        auto v = swagger::unserialize<qint32>(*it);
+        if(v) obj.setQuantity(*v);
+    }
+    if((it = json.find("shipDate")) != std::end(json)) {
+        auto v = swagger::unserialize<QDateTime>(*it);
+        if(v) obj.setShipDate(*v);
+    }
+    if((it = json.find("status")) != std::end(json)) {
+        auto v = SWAGGER_UNSERIALIZE_QENUM(Order, Status, *it);
+        if(v) obj.setStatus(*v);
+    }
+    if((it = json.find("complete")) != std::end(json)) {
+        auto v = swagger::unserialize<bool>(*it);
+        if(v) obj.setComplete(*v);
+    }
+    return obj;
+}
+
+} /* namespace Swagger */
+

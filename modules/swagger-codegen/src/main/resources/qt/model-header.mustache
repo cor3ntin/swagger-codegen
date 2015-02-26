@@ -1,0 +1,53 @@
+{{#models}}{{#model}}#ifndef AK_SWAGGER_{{classname}}_H_
+#define AK_SWAGGER_{{classname}}_H_
+{{/model}}
+{{/models}}
+
+#include "SwaggerUtils.h"
+#include <QStringList> //fixme
+
+class QJsonObject;
+
+{{#imports}}{{{import}}}
+{{/imports}}
+
+{{#models}}{{#model}}
+namespace swagger {
+
+class {{classname}} {
+    {{#hasEnums}}Q_GADGET{{/hasEnums}}
+public:
+    {{#vars}}{{#isEnum}}
+    enum class {{{datatypeWithEnum}}} {
+        {{#allowableValues}}{{#values}} {{.}},
+        {{/values}}{{/allowableValues}}
+    };
+    Q_ENUMS({{{datatypeWithEnum}}});{{/isEnum}}{{/vars}}
+
+    {{#hasRequiredVars}}{{classname}}();{{/hasRequiredVars}}
+    {{classname}}({{#vars}}{{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
+        {{/hasMore}}{{/vars}});
+
+    {{#vars}}
+    {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}} {{getter}}() const;
+    void {{setter}}({{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}});
+
+{{/vars}}
+
+    QJsonObject serialize() const;
+    static boost::optional<{{classname}}> unserialize(const QJsonObject & json);
+
+private:
+{{#vars}}    {{{datatypeWithEnum}}} m_{{name}};
+{{/vars}}
+};
+
+template <>
+struct is_model<{{classname}}> : std::true_type {};
+
+}
+Q_DECLARE_METATYPE(swagger::{{classname}});
+
+#endif
+{{/model}}
+{{/models}}

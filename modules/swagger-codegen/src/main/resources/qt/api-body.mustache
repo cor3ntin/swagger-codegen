@@ -1,0 +1,133 @@
+#include "{{classname}}_p.h"
+#include <array>
+#include <QUrlQuery>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QHttpMultiPart>
+#include <QJsonDocument>
+
+#include "SwaggerUtils.h"
+
+namespace swagger {
+{{#operations}}
+
+namespace {{classname}} {
+
+namespace responses {
+
+{{#operation}}
+{{nickname}}Request::{{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
+}
+
+AbstractRequest::Error {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
+
+    int callbackId = status;
+    static const std::array<int, {{responses.size}}> knownStatus{{ {{#responses}}{{code}}{{#hasMore}},{{/hasMore}} {{/responses}} }};
+    if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
+        callbackId = 0;
+
+   switch(callbackId) { {{#responses}}
+        case {{code}}:{ {{#dataType}} //{{{dataType}}}
+            auto value = swagger::unserialize<{{{dataType}}}>(data);
+            if(!value) {
+                logSwaggerError("Unable to unserialize {{{dataType}}}");
+                return AbstractRequest::InvalidResponse;
+            }
+            Q_EMIT finished{{code}}(*value);
+            {{/dataType}}{{^dataType}}
+            Q_EMIT finished{{code}}();
+            {{/dataType}}
+            return NoError;
+        }{{/responses}}
+        default:
+            return AbstractRequest::UnexpectedResponseCode;
+    }
+    return AbstractRequest::UnknownError;
+}
+
+{{/operation}}
+} //namespace responses
+{{/operations}}
+
+using namespace responses;
+
+namespace operations {
+
+{{#operations}}
+{{#operation}}
+
+
+
+{{nickname}}Request* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
+        {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
+        {{/hasMore}}{{/allParams}}) {
+
+    QByteArray http_method = QByteArrayLiteral("{{httpMethod}}");
+    QByteArray http_body;
+
+    QString path = QString(QLatin1String("{{path}}")).replace(QLatin1String("{format}"),"json");{{#pathParams}}
+    path.replace({{=<% %>=}}"{<% paramName %>}"<%={{ }}=%>, to_query_value({{^required}}*{{/required}}{{{paramName}}}));{{/pathParams}}
+
+    QUrlQuery queryParams;{{#queryParams}}
+    {{^required}}if({{paramName}}) {{/required}}queryParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/queryParams}}
+
+    QUrlQuery formParams;
+
+    QVariantMap headers;{{#headerParams}}
+    {{^required}}if({{paramName}}){{/required}} headers.insert("{{paramName}}", QVariant::fromValue<{{{dataType}}}>({{^required}}*{{/required}}{{paramName}}));{{/headerParams}}
+
+    {{#consumes.size}}QStringList contentTypes = {
+        {{#consumes}}"{{mediaType}}"{{#hasMore}},{{/hasMore}}{{/consumes}}
+    };
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+{{/consumes.size}}{{^consumes}}QString contentType(QLatin1String("application/json"));{{/consumes}}
+
+    {{#bodyParam}}{{#isFile}}if({{paramName}} &&contentTypes.isEmpty())
+        contentType = QMimeDatabase::mimeTypeForData({{paramName}});{{/isFile}}{{/bodyParam}}
+
+    {{#bodyParam}}{{^required}}if({{paramName}}) { {{/required}}
+        auto bodyVar = {{^required}}*{{/required}} {{paramName}};
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            {{#isPrimitiveType}}
+            formParams.addQueryItem("{{paramName}}", to_query_value(bodyVar));
+            {{/isPrimitiveType}}{{^isPrimitiveType}}
+            Q_ASSERT_X(false, "{{classname}}::{{nickname}}", "{{{dataType}}} {{paramName}} is not url encodable");{{/isPrimitiveType}}
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    {{/bodyParam}}
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    {{#formParams}}        {{^required}}if({{paramName}}){{/required}}set_form_data(parts,"{{paramName}}", {{#notFile}}{{^required}}*{{/required}}{{/notFile}}{{paramName}});
+    {{/formParams}}
+    }
+    else {
+    {{#formParams}}{{#notFile}}        {{^required}}if({{paramName}}){{/required}}formParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/notFile}}
+    {{/formParams}}
+    }
+
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
+    auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
+    request->send();
+    return request;
+}
+{{/operation}}
+
+}
+
+} //namespace {{classname}}
+{{/operations}}
+
+
+
+
+} /* namespace Swagger */

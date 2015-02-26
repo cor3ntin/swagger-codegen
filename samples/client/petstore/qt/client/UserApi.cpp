@@ -33,7 +33,8 @@ bool createUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0: { //if(m_empty_response_function)
+        case 0:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -63,7 +64,8 @@ bool createUsersWithArrayInputResponse::processResponse(int status, const QJsonV
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0: { //if(m_empty_response_function)
+        case 0:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -93,7 +95,8 @@ bool createUsersWithListInputResponse::processResponse(int status, const QJsonVa
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0: { //if(m_empty_response_function)
+        case 0:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -128,7 +131,7 @@ bool loginUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: { //QString
+        case 200: //QString
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QString - http status: %d", status);
                 return true;
@@ -141,7 +144,8 @@ bool loginUserResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -171,7 +175,8 @@ bool logoutUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0: { //if(m_empty_response_function)
+        case 0:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -211,10 +216,11 @@ bool getUserByNameResponse::processResponse(int status, const QJsonValue & data)
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: { //User
+        case 200: //User
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for User - http status: %d", status);
                 return true;
@@ -227,7 +233,8 @@ bool getUserByNameResponse::processResponse(int status, const QJsonValue & data)
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -262,10 +269,12 @@ bool updateUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -300,10 +309,12 @@ bool deleteUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:

@@ -43,13 +43,16 @@ bool updatePetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405: { //if(m_empty_response_function)
+        case 405:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -79,7 +82,8 @@ bool addPetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405: { //if(m_empty_response_function)
+        case 405:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -114,7 +118,7 @@ bool findPetsByStatusResponse::processResponse(int status, const QJsonValue & da
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: { //QVector<Pet>
+        case 200: //QVector<Pet>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
                 return true;
@@ -127,7 +131,8 @@ bool findPetsByStatusResponse::processResponse(int status, const QJsonValue & da
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -162,7 +167,7 @@ bool findPetsByTagsResponse::processResponse(int status, const QJsonValue & data
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: { //QVector<Pet>
+        case 200: //QVector<Pet>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
                 return true;
@@ -175,7 +180,8 @@ bool findPetsByTagsResponse::processResponse(int status, const QJsonValue & data
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -215,10 +221,11 @@ bool getPetByIdResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: { //Pet
+        case 200: //Pet
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Pet - http status: %d", status);
                 return true;
@@ -231,7 +238,8 @@ bool getPetByIdResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -261,7 +269,8 @@ bool updatePetWithFormResponse::processResponse(int status, const QJsonValue & d
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405: { //if(m_empty_response_function)
+        case 405:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -291,7 +300,8 @@ bool deletePetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -321,7 +331,8 @@ bool uploadFileResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0: { //if(m_empty_response_function)
+        case 0:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:

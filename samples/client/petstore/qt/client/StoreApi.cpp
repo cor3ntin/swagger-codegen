@@ -33,7 +33,7 @@ bool getInventoryResponse::processResponse(int status, const QJsonValue & data) 
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: { //QHash<QString, qint32>
+        case 200: //QHash<QString, qint32>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QHash<QString, qint32> - http status: %d", status);
                 return true;
@@ -78,7 +78,7 @@ bool placeOrderResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: { //Order
+        case 200: //Order
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Order - http status: %d", status);
                 return true;
@@ -91,7 +91,8 @@ bool placeOrderResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -131,10 +132,11 @@ bool getOrderByIdResponse::processResponse(int status, const QJsonValue & data) 
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: { //Order
+        case 200: //Order
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Order - http status: %d", status);
                 return true;
@@ -147,7 +149,8 @@ bool getOrderByIdResponse::processResponse(int status, const QJsonValue & data) 
             m_200_fun(*value);
             
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:
@@ -182,10 +185,12 @@ bool deleteOrderResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404: { //if(m_empty_response_function)
+        case 404:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400: { //if(m_empty_response_function)
+        case 400:
+            if(m_empty_response_function)
                 m_empty_response_function(status);
         }
         default:

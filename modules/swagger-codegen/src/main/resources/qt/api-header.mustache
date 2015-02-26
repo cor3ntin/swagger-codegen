@@ -1,0 +1,65 @@
+#ifndef AK_SWAGGER_{{classname}}_H_
+#define AK_SWAGGER_{{classname}}_H_
+
+{{#imports}}{{{import}}}
+{{/imports}}
+#include "AbstractResponse.h"
+#include "ApiInvoker.h"
+
+class QNetworkReply;
+
+namespace swagger {
+
+template <typename T>
+using Optional = boost::optional<T>;
+
+{{#operations}}
+namespace {{classname}} {
+
+namespace responses {
+
+{{#operation}}
+    class {{nickname}}Response;
+{{/operation}}
+}
+{{/operations}}
+
+
+{{#operations}}
+{{#operation}}
+responses::{{nickname}}Response* {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
+                {{/hasParams}}{{#allParams}}{{^required}}Optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}} {{paramName}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{^defaultValue}}{{^required}} = {} {{/required}}{{/defaultValue}}{{#hasMore}},
+                {{/hasMore}}{{/allParams}});
+
+{{/operation}}
+
+
+{{#operations}}
+namespace responses {
+
+{{#operation}}
+class {{nickname}}Response : public AbstractResponse {
+
+public:
+    {{nickname}}Response(QNetworkReply* reply, AbstractApiInvoker* invoker);
+{{#responses}}    {{nickname}}Response* on(const std::function<void({{{dataType}}})> & callback);
+{{/responses}}
+
+protected:
+    bool processResponse(int status, const QJsonValue & data);
+
+private:
+{{#responses}}    std::function<void({{{dataType}}})> m_{{code}}_fun;
+{{/responses}}
+};
+
+{{/operation}}
+} //namespace responses
+{{/operations}}
+
+} //namespace {{classname}}
+{{/operations}}
+
+} //namespace swagger
+
+#endif /* {{classname}}_H_ */

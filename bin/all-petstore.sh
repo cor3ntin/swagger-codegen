@@ -29,3 +29,4 @@ cd $APP_DIR
 ./bin/objc-petstore.sh
 ./bin/scala-petstore.sh
 ./bin/tizen-petstore.sh
+./bin/qt-petstore.sh

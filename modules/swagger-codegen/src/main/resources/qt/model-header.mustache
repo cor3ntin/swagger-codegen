@@ -1,0 +1,44 @@
+{{#models}}{{#model}}#ifndef AK_SWAGGER_{{classname}}_H_
+#define AK_SWAGGER_{{classname}}_H_
+{{/model}}
+{{/models}}
+
+#include <boost/optional/optional.hpp>
+#include <QStringList> //fixme
+
+class QJsonObject;
+
+{{#imports}}{{{import}}}
+{{/imports}}
+
+{{#models}}{{#model}}
+namespace swagger {
+
+template <typename T>
+using Optional = boost::optional<T>;
+
+class {{classname}} {
+public:
+    {{classname}}();
+    {{classname}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
+        {{/hasMore}}{{/vars}});
+
+{{#vars}}    {{{datatype}}} {{getter}}() const;
+    void {{setter}}({{^isPrimitiveType}}const{{/isPrimitiveType}} {{{datatype}}} {{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}});
+
+{{/vars}}
+
+    QJsonObject serialize() const;
+    static Optional<{{classname}}> unserialize(const QJsonObject & json);
+
+private:
+{{#vars}}    {{{datatype}}} m_{{name}};
+{{/vars}}
+};
+
+
+}
+
+#endif
+{{/model}}
+{{/models}}

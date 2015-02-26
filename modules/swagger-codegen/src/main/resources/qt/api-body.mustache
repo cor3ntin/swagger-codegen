@@ -1,0 +1,106 @@
+#include "{{classname}}.h"
+
+#include <QUrlQuery>
+#include <QNetworkRequest>
+#include <QHttpMultiPart>
+
+#include "SwaggerUtils.h"
+
+namespace swagger {
+{{#operations}}
+
+namespace {{classname}} {
+
+namespace responses {
+
+{{#operation}}
+{{nickname}}Response::{{nickname}}Response(QNetworkReply* reply, AbstractApiInvoker* invoker)
+    : AbstractResponse(reply, invoker) {
+}
+
+{{#responses}}
+{{nickname}}Response* {{nickname}}Response::on(const std::function<void({{{dataType}}})> & callback) {
+    m_{{code}}_fun = callback;
+    return this;
+}
+
+{{/responses}}
+bool {{nickname}}Response::processResponse(int status, const QJsonValue & data) {
+    int callbackId = status;
+    static const std::array<int, {{responses.size}}> knownStatus{{ {{#responses}}{{code}}{{#hasMore}},{{/hasMore}} {{/responses}} }};
+    if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
+        callbackId = 0;
+
+    switch(callbackId) { {{#responses}}
+        case {{code}}: { //{{{dataType}}}
+            if(!m_{{code}}_fun) {
+                logSwaggerWarning("No callback defined for {{{dataType}}} - http status: %d", status);
+                return true;
+            }
+            auto value = swagger::unserialize<{{{dataType}}}>(data);
+            if(!value) {
+                logSwaggerError("Unable to unserialize {{{dataType}}}");
+                return false;
+            }
+            m_{{code}}_fun(*value);
+        }{{/responses}}
+        default:
+            Q_ASSERT(false);
+    }
+    return false;
+}
+
+{{/operation}}
+} //namespace responses
+{{/operations}}
+
+using namespace responses;
+
+{{#operations}}
+{{#operation}}
+
+{{nickname}}Response* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
+        {{/hasParams}}{{#allParams}}{{^required}}Optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}} {{paramName}}{{#hasMore}},
+        {{/hasMore}}{{/allParams}}) {
+
+
+    QString path = QString(QLatin1String("{{path}}")).replace(QLatin1String("{format}"),"json");{{#pathParams}}
+    path.replaceAll("{" + "{{paramName}}" + "}", to_query_value({{^required}}*{{/required}}{{{paramName}}}));{{/pathParams}}
+
+    QUrlQuery queryParams;{{#queryParams}}
+    {{^required}}if({{paramName}}) {{/required}}queryParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/queryParams}}
+
+    QUrlQuery formParams;
+
+    QVariantMap headers;{{#headerParams}}
+    {{^required}}if({{paramName}}){{/required}} headers.insert("{{paramName}}", QVariant::fromValue<{{{dataType}}}>({{^required}}*{{/required}}{{paramName}}));{{/headerParams}}
+
+    {{#consumes}}QStringList contentTypes = {
+        {{#consumes}}"{{mediaType}}"{{#hasMore}},{{/hasMore}}{{/consumes}}
+    };
+    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+{{/consumes}}{{^consumes}}QString contentType(QLatin1String("application/json"));{{/consumes}}
+
+    QHttpMultiPart* parts = nullptr;{{#formParams}}
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    {{#formParams}}{{#notFile}}        {{^required}}if({{paramName}}){{/required}}set_form_data(parts,"{{paramName}}", {{^required}}*{{/required}}{{paramName}});
+    {{/notFile}}{{/formParams}}
+    }
+    else {
+    {{#formParams}}{{#notFile}}        {{^required}}if({{paramName}}){{/required}}queryParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/notFile}}
+    {{/formParams}}
+    }{{/formParams}}
+
+    auto reply = invoker->invoke(path, QByteArrayLiteral("{{httpMethod}}"), queryParams, headers, formParams, parts, contentType);
+    return new {{nickname}}Response(reply, invoker);
+
+}
+{{/operation}}
+
+} //namespace {{classname}}
+{{/operations}}
+
+
+
+
+} /* namespace Swagger */

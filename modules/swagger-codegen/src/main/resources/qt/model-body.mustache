@@ -1,0 +1,58 @@
+{{#models}}
+{{#model}}
+#include "{{classname}}.h"
+#include <QJsonObject>
+
+#include "SwaggerUtils.h"
+
+namespace swagger {
+
+{{{classname}}}::{{{classname}}}()
+{{#hasVars}}    : {{#vars}}m_{{name}}{ {{#defaultValue}}{{defaultValue}}{{/defaultValue}} }{{#hasMore}}
+    , {{/hasMore}}{{/vars}} {{/hasVars}} {
+}
+
+{{{classname}}}::{{{classname}}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{#hasMore}},
+        {{/hasMore}}{{/vars}}) {
+
+{{#vars}}    {{setter}}({{name}});
+{{/vars}}
+}
+
+
+{{#vars}}
+{{datatype}} {{{classname}}}::{{getter}}() const {
+    return m_{{name}};
+}
+
+void  {{{classname}}}::{{setter}}({{^isPrimitiveType}}const{{/isPrimitiveType}} {{{datatype}}} {{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}) {
+    m_{{name}} = {{name}};
+}
+
+{{/vars}}
+
+
+QJsonObject {{classname}}::serialize() const {
+    QJsonObject json;
+
+    {{#vars}}json.insert("{{name}}", swagger::serialize(m_{{name}}));
+    {{/vars}}
+    return json;
+}
+
+Optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & json) {
+    auto it = json.end();
+    {{classname}} obj;{{#vars}}
+    if((it = json.find("{{name}}")) != std::end(json)) {
+        auto v = swagger::unserialize<{{{datatype}}}>(*it);
+        {{#required}}if(!v) return {};
+        {{/required}}{{^required}}if(v) {{/required}}obj.{{setter}}(*v);
+    }{{#required}}
+    else return {};{{/required}}{{/vars}}
+    return obj;
+}
+
+} /* namespace Swagger */
+
+{{/model}}
+{{/models}}

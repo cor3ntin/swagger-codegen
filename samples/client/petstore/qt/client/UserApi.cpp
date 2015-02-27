@@ -3,6 +3,7 @@
 #include <QUrlQuery>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
+#include <QJsonDocument>
 
 #include "SwaggerUtils.h"
 
@@ -21,10 +22,6 @@ createUserResponse* createUserResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-createUserResponse* createUserResponse::on(const std::function<void()> & callback) {
-    m_0_fun = callback;
-    return this;
-}
 
 bool createUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -33,7 +30,8 @@ bool createUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0:
+        case 0:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -52,10 +50,6 @@ createUsersWithArrayInputResponse* createUsersWithArrayInputResponse::onEmptyRes
     return this;
 }
 
-createUsersWithArrayInputResponse* createUsersWithArrayInputResponse::on(const std::function<void()> & callback) {
-    m_0_fun = callback;
-    return this;
-}
 
 bool createUsersWithArrayInputResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -64,7 +58,8 @@ bool createUsersWithArrayInputResponse::processResponse(int status, const QJsonV
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0:
+        case 0:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -83,10 +78,6 @@ createUsersWithListInputResponse* createUsersWithListInputResponse::onEmptyRespo
     return this;
 }
 
-createUsersWithListInputResponse* createUsersWithListInputResponse::on(const std::function<void()> & callback) {
-    m_0_fun = callback;
-    return this;
-}
 
 bool createUsersWithListInputResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -95,7 +86,8 @@ bool createUsersWithListInputResponse::processResponse(int status, const QJsonVa
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0:
+        case 0:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -114,13 +106,9 @@ loginUserResponse* loginUserResponse::onEmptyResponse(std::function<void(int)> f
     return this;
 }
 
+
 loginUserResponse* loginUserResponse::on(const std::function<void(QString)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-loginUserResponse* loginUserResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -131,7 +119,7 @@ bool loginUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: //QString
+        case 200:{  //QString
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QString - http status: %d", status);
                 return true;
@@ -144,7 +132,8 @@ bool loginUserResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -163,10 +152,6 @@ logoutUserResponse* logoutUserResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-logoutUserResponse* logoutUserResponse::on(const std::function<void()> & callback) {
-    m_0_fun = callback;
-    return this;
-}
 
 bool logoutUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -175,7 +160,8 @@ bool logoutUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0:
+        case 0:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -194,18 +180,9 @@ getUserByNameResponse* getUserByNameResponse::onEmptyResponse(std::function<void
     return this;
 }
 
-getUserByNameResponse* getUserByNameResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
 
 getUserByNameResponse* getUserByNameResponse::on(const std::function<void(User)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-getUserByNameResponse* getUserByNameResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -216,11 +193,12 @@ bool getUserByNameResponse::processResponse(int status, const QJsonValue & data)
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: //User
+        case 200:{  //User
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for User - http status: %d", status);
                 return true;
@@ -233,7 +211,8 @@ bool getUserByNameResponse::processResponse(int status, const QJsonValue & data)
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -252,15 +231,6 @@ updateUserResponse* updateUserResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-updateUserResponse* updateUserResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
-
-updateUserResponse* updateUserResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
-    return this;
-}
 
 bool updateUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -269,11 +239,13 @@ bool updateUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -292,15 +264,6 @@ deleteUserResponse* deleteUserResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-deleteUserResponse* deleteUserResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
-
-deleteUserResponse* deleteUserResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
-    return this;
-}
 
 bool deleteUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -309,11 +272,13 @@ bool deleteUserResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -331,6 +296,8 @@ using namespace responses;
 createUserResponse* createUser (AbstractApiInvoker* invoker,
         Optional<User> body) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user")).replace(QLatin1String("{format}"),"json");
 
@@ -342,9 +309,33 @@ createUserResponse* createUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "UserApi::createUser", "User body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new createUserResponse(reply, invoker);
 
 }
@@ -352,6 +343,8 @@ createUserResponse* createUser (AbstractApiInvoker* invoker,
 createUsersWithArrayInputResponse* createUsersWithArrayInput (AbstractApiInvoker* invoker,
         Optional<QVector<User>> body) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/createWithArray")).replace(QLatin1String("{format}"),"json");
 
@@ -363,9 +356,33 @@ createUsersWithArrayInputResponse* createUsersWithArrayInput (AbstractApiInvoker
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "UserApi::createUsersWithArrayInput", "QVector<User> body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new createUsersWithArrayInputResponse(reply, invoker);
 
 }
@@ -373,6 +390,8 @@ createUsersWithArrayInputResponse* createUsersWithArrayInput (AbstractApiInvoker
 createUsersWithListInputResponse* createUsersWithListInput (AbstractApiInvoker* invoker,
         Optional<QVector<User>> body) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/createWithList")).replace(QLatin1String("{format}"),"json");
 
@@ -384,9 +403,33 @@ createUsersWithListInputResponse* createUsersWithListInput (AbstractApiInvoker* 
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "UserApi::createUsersWithListInput", "QVector<User> body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new createUsersWithListInputResponse(reply, invoker);
 
 }
@@ -395,6 +438,8 @@ loginUserResponse* loginUser (AbstractApiInvoker* invoker,
         Optional<QString> username,
         Optional<QString> password) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/login")).replace(QLatin1String("{format}"),"json");
 
@@ -408,15 +453,27 @@ loginUserResponse* loginUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new loginUserResponse(reply, invoker);
 
 }
 
 logoutUserResponse* logoutUser (AbstractApiInvoker* invoker) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/logout")).replace(QLatin1String("{format}"),"json");
 
@@ -428,9 +485,19 @@ logoutUserResponse* logoutUser (AbstractApiInvoker* invoker) {
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new logoutUserResponse(reply, invoker);
 
 }
@@ -438,9 +505,11 @@ logoutUserResponse* logoutUser (AbstractApiInvoker* invoker) {
 getUserByNameResponse* getUserByName (AbstractApiInvoker* invoker,
         const QString& username) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/{username}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "username" + "}", to_query_value(username));
+    path.replace("{username}", to_query_value(username));
 
     QUrlQuery queryParams;
 
@@ -450,9 +519,19 @@ getUserByNameResponse* getUserByName (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new getUserByNameResponse(reply, invoker);
 
 }
@@ -461,9 +540,11 @@ updateUserResponse* updateUser (AbstractApiInvoker* invoker,
         const QString& username,
         Optional<User> body) {
 
+    QByteArray http_method = QByteArrayLiteral("PUT");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/{username}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "username" + "}", to_query_value(username));
+    path.replace("{username}", to_query_value(username));
 
     QUrlQuery queryParams;
 
@@ -473,9 +554,33 @@ updateUserResponse* updateUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("PUT"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "UserApi::updateUser", "User body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new updateUserResponse(reply, invoker);
 
 }
@@ -483,9 +588,11 @@ updateUserResponse* updateUser (AbstractApiInvoker* invoker,
 deleteUserResponse* deleteUser (AbstractApiInvoker* invoker,
         const QString& username) {
 
+    QByteArray http_method = QByteArrayLiteral("DELETE");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/user/{username}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "username" + "}", to_query_value(username));
+    path.replace("{username}", to_query_value(username));
 
     QUrlQuery queryParams;
 
@@ -495,9 +602,19 @@ deleteUserResponse* deleteUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("DELETE"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new deleteUserResponse(reply, invoker);
 
 }

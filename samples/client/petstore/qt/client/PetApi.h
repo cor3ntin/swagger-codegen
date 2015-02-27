@@ -3,7 +3,7 @@
 
 #include "Pet.h"
 #include <QString>
-#include "File.h"
+#include <QIODevice>
 #include "AbstractResponse.h"
 #include "ApiInvoker.h"
 
@@ -50,13 +50,13 @@ responses::updatePetWithFormResponse* updatePetWithForm(AbstractApiInvoker* invo
                 Optional<QString> status = {} );
 
 responses::deletePetResponse* deletePet(AbstractApiInvoker* invoker,
-                Optional<QString> api_key = {} ,
-                const qint64& petId);
+                const qint64& petId,
+                Optional<QString> api_key = {} );
 
 responses::uploadFileResponse* uploadFile(AbstractApiInvoker* invoker,
                 const qint64& petId,
                 Optional<QString> additionalMetadata = {} ,
-                Optional<File> file = {} );
+                QIODevice* file = {} );
 
 
 

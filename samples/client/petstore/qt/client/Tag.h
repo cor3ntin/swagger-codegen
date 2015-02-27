@@ -16,7 +16,7 @@ using Optional = boost::optional<T>;
 
 class Tag {
 public:
-    Tag();
+    
     Tag(qint64 id = {},
         const QString& name = {});
 

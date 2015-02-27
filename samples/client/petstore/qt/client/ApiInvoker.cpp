@@ -22,10 +22,21 @@ QString AbstractApiInvoker::getBasePath() {
     return QStringLiteral("http://petstore.swagger.io/v2");
 }
 
+template <typename First>
+bool multi_xor(First f) {
+    return f;
+}
+
+template <typename First, typename... Args>
+bool multi_xor(First f, Args... args) {
+    bool xxor = multi_xor(args...);
+    return (f ? true : false) != xxor;
+}
+
 QNetworkReply* AbstractApiInvoker::invoke(const QString & path, const QByteArray & method,
                                   QUrlQuery queryParams, QVariantMap headerParams,
                                   QUrlQuery formParams, QHttpMultiPart* parts,
-                                  const QString & contentType) {
+                                  const QString & contentType, const QByteArray & body, QIODevice* device) {
     QUrl url;
     url.setUrl(getBasePath());
     url.setPath(url.path() + "/" + path);
@@ -41,13 +52,14 @@ QNetworkReply* AbstractApiInvoker::invoke(const QString & path, const QByteArray
     Q_ASSERT(
         ((method == "GET"  || method == "DELETE" || method == "OPTIONS")
         && formParams.isEmpty() && !parts)
-        || ((method == "POST" || method == "PUT") && formParams.isEmpty() != (parts == nullptr))
+        || ((method == "POST" || method == "PUT") &&
+            multi_xor(formParams.isEmpty(), parts, body.isEmpty(), device))
     );
 
     return invoke(std::move(req),
                   method,
-                  formParams.isEmpty() ? QByteArray() : formParams.toString().toUtf8(),
-                      parts);
+                  formParams.isEmpty() ? body : formParams.toString().toUtf8(),
+                  parts, device);
 }
 
 
@@ -56,21 +68,23 @@ void AbstractApiInvoker::onError(const AbstractResponse* const) {
 }
 
 QNetworkReply* ApiInvoker::invoke(QNetworkRequest && request, const QByteArray & method,
-                                const QByteArray & body, QHttpMultiPart* parts) {
+                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device) {
 
     if(method == "GET") {
         return m_nm->get(request);
     }
     if(method == "POST") {
-        if(parts) {
+        if(parts)
             return m_nm->post(request, parts);
-        }
+        if(device)
+            return m_nm->post(request, device);
         return m_nm->post(request, body);
     }
     if(method == "PUT") {
-        if(parts) {
+        if(parts)
             return m_nm->put(request, parts);
-        }
+        if(device)
+            return m_nm->put(request, device);
         return m_nm->put(request, body);
     }
     if(method == "DELETE") {

@@ -9,6 +9,8 @@
 #include <QJsonArray>
 #include <QVariant>
 #include <QLoggingCategory>
+#include <QMimeDatabase>
+class QIODevice;
 
 namespace swagger {
 
@@ -28,7 +30,7 @@ template <>
 inline QString to_query_value(const QString & t) { return t;}
 
 template <typename T>
-inline void set_form_data(QHttpMultiPart* & parts, const QString & k, const T & value) {
+void set_form_data(QHttpMultiPart* & parts, const QString & k, T value) {
     QHttpPart part;
     part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
     part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(QStringLiteral("form-data; name=\"%1\"").arg(k)));
@@ -38,10 +40,28 @@ inline void set_form_data(QHttpMultiPart* & parts, const QString & k, const T & 
     parts->append(part);
 }
 
+template <>
+inline void set_form_data<QIODevice*>(QHttpMultiPart* & parts, const QString & k, QIODevice* value) {
+    QHttpPart part;
+    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForData(value).name()));
+    part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(QStringLiteral("form-data; name=\"%1\"").arg(k)));
+    part.setBodyDevice(value);
+    if(!parts)
+        parts = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    parts->append(part);
+}
+
 template <typename Container>
 struct is_array : std::false_type { };
 template <typename... Ts> struct is_array<QVector<Ts...> > : std::true_type { };
 template <> struct is_array<QStringList> : std::true_type { };
+
+
+template <typename Container>
+struct is_associative_array : std::false_type { };
+template <typename Key, typename Value> struct is_associative_array<QHash<Key,Value> > : std::true_type { };
+template <typename Key, typename Value> struct is_associative_array<QMap<Key,Value> > : std::true_type { };
+
 
 template <typename T>
 typename std::enable_if<std::is_same<T, bool>::value, Optional<T>>::type
@@ -103,6 +123,24 @@ unserialize(const QJsonValue & value) {
     return array;
 }
 
+template <typename T>
+typename std::enable_if<swagger::is_associative_array<T>::value, Optional<T>>::type
+unserialize(const QJsonValue & value) {
+    if(!value.isObject())
+        return {};
+    auto object = value.toObject();
+    T map;
+    for(auto it = std::begin(object);
+        it != std::end(object); it++) {
+        auto k = swagger::unserialize<typename T::key_type>(it.key());
+        auto v = swagger::unserialize<typename T::mapped_type>(it.value());
+        if(!v || !k)
+            return {};
+        map.insert(*k, *v);
+    }
+    return map;
+}
+
 
 //////////////////////////////
 
@@ -144,6 +182,18 @@ serialize(const T& value) {
         array.append(swagger::serialize(e));
     }
     return array;
+}
+
+template <typename T>
+typename std::enable_if<swagger::is_associative_array<T>::value, QJsonValue>::type
+serialize(const T& value) {
+    QJsonObject object;
+    for(auto it = std::begin(value);
+        it != std::end(value); it++) {
+
+        object.insert(it.key(), swagger::serialize(it.value()));
+    }
+    return object;
 }
 
 }

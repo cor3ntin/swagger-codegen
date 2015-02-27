@@ -7,10 +7,10 @@
 
 namespace swagger {
 
-{{{classname}}}::{{{classname}}}()
-{{#hasVars}}    : {{#vars}}m_{{name}}{ {{#defaultValue}}{{defaultValue}}{{/defaultValue}} }{{#hasMore}}
+{{#hasRequiredVars}}{{{classname}}}::{{{classname}}}()
+{{#hasVars}}    : {{#vars}}m_{{name}}{}{{#hasMore}}
     , {{/hasMore}}{{/vars}} {{/hasVars}} {
-}
+}{{/hasRequiredVars}}
 
 {{{classname}}}::{{{classname}}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{#hasMore}},
         {{/hasMore}}{{/vars}}) {
@@ -21,7 +21,7 @@ namespace swagger {
 
 
 {{#vars}}
-{{datatype}} {{{classname}}}::{{getter}}() const {
+{{{datatype}}} {{{classname}}}::{{getter}}() const {
     return m_{{name}};
 }
 

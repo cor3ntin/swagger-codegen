@@ -19,7 +19,7 @@ using Optional = boost::optional<T>;
 
 class {{classname}} {
 public:
-    {{classname}}();
+    {{#hasRequiredVars}}{{classname}}();{{/hasRequiredVars}}
     {{classname}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
         {{/hasMore}}{{/vars}});
 

@@ -28,7 +28,7 @@ namespace responses {
 {{#operations}}
 {{#operation}}
 responses::{{nickname}}Response* {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
-                {{/hasParams}}{{#allParams}}{{^required}}Optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}} {{paramName}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{^defaultValue}}{{^required}} = {} {{/required}}{{/defaultValue}}{{#hasMore}},
+                {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}Optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{^required}} = {} {{/required}}{{#hasMore}},
                 {{/hasMore}}{{/allParams}});
 
 {{/operation}}

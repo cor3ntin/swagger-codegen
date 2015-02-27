@@ -5,16 +5,7 @@
 
 namespace swagger {
 
-User::User()
-    : m_id{ 0 }
-    , m_username{ QString::null }
-    , m_firstName{ QString::null }
-    , m_lastName{ QString::null }
-    , m_email{ QString::null }
-    , m_password{ QString::null }
-    , m_phone{ QString::null }
-    , m_userStatus{ 0 }  {
-}
+
 
 User::User(qint64 id,
         const QString& username,

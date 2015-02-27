@@ -16,7 +16,7 @@ using Optional = boost::optional<T>;
 
 class User {
 public:
-    User();
+    
     User(qint64 id = {},
         const QString& username = {},
         const QString& firstName = {},

@@ -5,14 +5,7 @@
 
 namespace swagger {
 
-Order::Order()
-    : m_id{ 0 }
-    , m_petId{ 0 }
-    , m_quantity{ 0 }
-    , m_shipDate{ {} }
-    , m_status{ QString::null }
-    , m_complete{ false }  {
-}
+
 
 Order::Order(qint64 id,
         qint64 petId,

@@ -17,7 +17,7 @@ using Optional = boost::optional<T>;
 
 class Order {
 public:
-    Order();
+    
     Order(qint64 id = {},
         qint64 petId = {},
         qint32 quantity = {},

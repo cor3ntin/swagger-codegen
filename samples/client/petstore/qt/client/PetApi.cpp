@@ -3,6 +3,7 @@
 #include <QUrlQuery>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
+#include <QJsonDocument>
 
 #include "SwaggerUtils.h"
 
@@ -21,20 +22,6 @@ updatePetResponse* updatePetResponse::onEmptyResponse(std::function<void(int)> f
     return this;
 }
 
-updatePetResponse* updatePetResponse::on(const std::function<void()> & callback) {
-    m_405_fun = callback;
-    return this;
-}
-
-updatePetResponse* updatePetResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
-
-updatePetResponse* updatePetResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
-    return this;
-}
 
 bool updatePetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -43,15 +30,18 @@ bool updatePetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405:
+        case 405:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -70,10 +60,6 @@ addPetResponse* addPetResponse::onEmptyResponse(std::function<void(int)> fun) {
     return this;
 }
 
-addPetResponse* addPetResponse::on(const std::function<void()> & callback) {
-    m_405_fun = callback;
-    return this;
-}
 
 bool addPetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -82,7 +68,8 @@ bool addPetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405:
+        case 405:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -101,13 +88,9 @@ findPetsByStatusResponse* findPetsByStatusResponse::onEmptyResponse(std::functio
     return this;
 }
 
+
 findPetsByStatusResponse* findPetsByStatusResponse::on(const std::function<void(QVector<Pet>)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-findPetsByStatusResponse* findPetsByStatusResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -118,7 +101,7 @@ bool findPetsByStatusResponse::processResponse(int status, const QJsonValue & da
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: //QVector<Pet>
+        case 200:{  //QVector<Pet>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
                 return true;
@@ -131,7 +114,8 @@ bool findPetsByStatusResponse::processResponse(int status, const QJsonValue & da
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -150,13 +134,9 @@ findPetsByTagsResponse* findPetsByTagsResponse::onEmptyResponse(std::function<vo
     return this;
 }
 
+
 findPetsByTagsResponse* findPetsByTagsResponse::on(const std::function<void(QVector<Pet>)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-findPetsByTagsResponse* findPetsByTagsResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -167,7 +147,7 @@ bool findPetsByTagsResponse::processResponse(int status, const QJsonValue & data
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: //QVector<Pet>
+        case 200:{  //QVector<Pet>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
                 return true;
@@ -180,7 +160,8 @@ bool findPetsByTagsResponse::processResponse(int status, const QJsonValue & data
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -199,18 +180,9 @@ getPetByIdResponse* getPetByIdResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-getPetByIdResponse* getPetByIdResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
 
 getPetByIdResponse* getPetByIdResponse::on(const std::function<void(Pet)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-getPetByIdResponse* getPetByIdResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -221,11 +193,12 @@ bool getPetByIdResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: //Pet
+        case 200:{  //Pet
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Pet - http status: %d", status);
                 return true;
@@ -238,7 +211,8 @@ bool getPetByIdResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -257,10 +231,6 @@ updatePetWithFormResponse* updatePetWithFormResponse::onEmptyResponse(std::funct
     return this;
 }
 
-updatePetWithFormResponse* updatePetWithFormResponse::on(const std::function<void()> & callback) {
-    m_405_fun = callback;
-    return this;
-}
 
 bool updatePetWithFormResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -269,7 +239,8 @@ bool updatePetWithFormResponse::processResponse(int status, const QJsonValue & d
         callbackId = 0;
 
     switch(callbackId) { 
-        case 405:
+        case 405:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -288,10 +259,6 @@ deletePetResponse* deletePetResponse::onEmptyResponse(std::function<void(int)> f
     return this;
 }
 
-deletePetResponse* deletePetResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
-    return this;
-}
 
 bool deletePetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -300,7 +267,8 @@ bool deletePetResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -319,10 +287,6 @@ uploadFileResponse* uploadFileResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
-uploadFileResponse* uploadFileResponse::on(const std::function<void()> & callback) {
-    m_0_fun = callback;
-    return this;
-}
 
 bool uploadFileResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -331,7 +295,8 @@ bool uploadFileResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 0:
+        case 0:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -349,6 +314,8 @@ using namespace responses;
 updatePetResponse* updatePet (AbstractApiInvoker* invoker,
         Optional<Pet> body) {
 
+    QByteArray http_method = QByteArrayLiteral("PUT");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet")).replace(QLatin1String("{format}"),"json");
 
@@ -359,18 +326,38 @@ updatePetResponse* updatePet (AbstractApiInvoker* invoker,
     QVariantMap headers;
 
     QStringList contentTypes = {
-        "application/json","application/xml",
-    };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
-QStringList contentTypes = {
         "application/json","application/xml"
     };
     QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("PUT"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "PetApi::updatePet", "Pet body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new updatePetResponse(reply, invoker);
 
 }
@@ -378,6 +365,8 @@ QStringList contentTypes = {
 addPetResponse* addPet (AbstractApiInvoker* invoker,
         Optional<Pet> body) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet")).replace(QLatin1String("{format}"),"json");
 
@@ -388,18 +377,38 @@ addPetResponse* addPet (AbstractApiInvoker* invoker,
     QVariantMap headers;
 
     QStringList contentTypes = {
-        "application/json","application/xml",
-    };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
-QStringList contentTypes = {
         "application/json","application/xml"
     };
     QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "PetApi::addPet", "Pet body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new addPetResponse(reply, invoker);
 
 }
@@ -407,6 +416,8 @@ QStringList contentTypes = {
 findPetsByStatusResponse* findPetsByStatus (AbstractApiInvoker* invoker,
         Optional<QStringList> status) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/findByStatus")).replace(QLatin1String("{format}"),"json");
 
@@ -419,9 +430,19 @@ findPetsByStatusResponse* findPetsByStatus (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new findPetsByStatusResponse(reply, invoker);
 
 }
@@ -429,6 +450,8 @@ findPetsByStatusResponse* findPetsByStatus (AbstractApiInvoker* invoker,
 findPetsByTagsResponse* findPetsByTags (AbstractApiInvoker* invoker,
         Optional<QStringList> tags) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/findByTags")).replace(QLatin1String("{format}"),"json");
 
@@ -441,9 +464,19 @@ findPetsByTagsResponse* findPetsByTags (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new findPetsByTagsResponse(reply, invoker);
 
 }
@@ -451,9 +484,11 @@ findPetsByTagsResponse* findPetsByTags (AbstractApiInvoker* invoker,
 getPetByIdResponse* getPetById (AbstractApiInvoker* invoker,
         const qint64& petId) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/{petId}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "petId" + "}", to_query_value(petId));
+    path.replace("{petId}", to_query_value(petId));
 
     QUrlQuery queryParams;
 
@@ -463,9 +498,19 @@ getPetByIdResponse* getPetById (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new getPetByIdResponse(reply, invoker);
 
 }
@@ -475,9 +520,11 @@ updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
         Optional<QString> name,
         Optional<QString> status) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/{petId}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "petId" + "}", to_query_value(petId));
+    path.replace("{petId}", to_query_value(petId));
 
     QUrlQuery queryParams;
 
@@ -491,6 +538,10 @@ updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
     QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
+    
+
+    
+
     QHttpMultiPart* parts = nullptr;
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
             if(name)set_form_data(parts,"name", *name);
@@ -498,33 +549,25 @@ updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
     
     }
     else {
-            if(name)queryParams.addQueryItem("name", to_query_value(*name));
-            if(status)queryParams.addQueryItem("status", to_query_value(*status));
-    
-    }
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-            if(name)set_form_data(parts,"name", *name);
-            if(status)set_form_data(parts,"status", *status);
-    
-    }
-    else {
-            if(name)queryParams.addQueryItem("name", to_query_value(*name));
-            if(status)queryParams.addQueryItem("status", to_query_value(*status));
+            if(name)formParams.addQueryItem("name", to_query_value(*name));
+            if(status)formParams.addQueryItem("status", to_query_value(*status));
     
     }
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new updatePetWithFormResponse(reply, invoker);
 
 }
 
 deletePetResponse* deletePet (AbstractApiInvoker* invoker,
-        Optional<QString> api_key,
-        const qint64& petId) {
+        const qint64& petId,
+        Optional<QString> api_key) {
 
+    QByteArray http_method = QByteArrayLiteral("DELETE");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/{petId}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "petId" + "}", to_query_value(petId));
+    path.replace("{petId}", to_query_value(petId));
 
     QUrlQuery queryParams;
 
@@ -535,9 +578,19 @@ deletePetResponse* deletePet (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("DELETE"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new deletePetResponse(reply, invoker);
 
 }
@@ -545,11 +598,13 @@ deletePetResponse* deletePet (AbstractApiInvoker* invoker,
 uploadFileResponse* uploadFile (AbstractApiInvoker* invoker,
         const qint64& petId,
         Optional<QString> additionalMetadata,
-        Optional<File> file) {
+        QIODevice* file) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/pet/{petId}/uploadImage")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "petId" + "}", to_query_value(petId));
+    path.replace("{petId}", to_query_value(petId));
 
     QUrlQuery queryParams;
 
@@ -563,27 +618,23 @@ uploadFileResponse* uploadFile (AbstractApiInvoker* invoker,
     QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
+    
+
+    
+
     QHttpMultiPart* parts = nullptr;
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
             if(additionalMetadata)set_form_data(parts,"additionalMetadata", *additionalMetadata);
+            if(file)set_form_data(parts,"file", file);
     
     }
     else {
-            if(additionalMetadata)queryParams.addQueryItem("additionalMetadata", to_query_value(*additionalMetadata));
-    
-    
-    }
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-            if(additionalMetadata)set_form_data(parts,"additionalMetadata", *additionalMetadata);
-    
-    }
-    else {
-            if(additionalMetadata)queryParams.addQueryItem("additionalMetadata", to_query_value(*additionalMetadata));
+            if(additionalMetadata)formParams.addQueryItem("additionalMetadata", to_query_value(*additionalMetadata));
     
     
     }
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new uploadFileResponse(reply, invoker);
 
 }

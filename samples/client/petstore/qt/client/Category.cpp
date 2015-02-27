@@ -5,10 +5,7 @@
 
 namespace swagger {
 
-Category::Category()
-    : m_id{ 0 }
-    , m_name{ QString::null }  {
-}
+
 
 Category::Category(qint64 id,
         const QString& name) {

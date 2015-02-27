@@ -3,6 +3,7 @@
 #include <QUrlQuery>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
+#include <QJsonDocument>
 
 #include "SwaggerUtils.h"
 
@@ -21,6 +22,7 @@ getInventoryResponse* getInventoryResponse::onEmptyResponse(std::function<void(i
     return this;
 }
 
+
 getInventoryResponse* getInventoryResponse::on(const std::function<void(QHash<QString, qint32>)> & callback) {
     m_200_fun = callback;
     return this;
@@ -33,7 +35,7 @@ bool getInventoryResponse::processResponse(int status, const QJsonValue & data) 
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: //QHash<QString, qint32>
+        case 200:{  //QHash<QString, qint32>
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for QHash<QString, qint32> - http status: %d", status);
                 return true;
@@ -61,13 +63,9 @@ placeOrderResponse* placeOrderResponse::onEmptyResponse(std::function<void(int)>
     return this;
 }
 
+
 placeOrderResponse* placeOrderResponse::on(const std::function<void(Order)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-placeOrderResponse* placeOrderResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -78,7 +76,7 @@ bool placeOrderResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 200: //Order
+        case 200:{  //Order
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Order - http status: %d", status);
                 return true;
@@ -91,7 +89,8 @@ bool placeOrderResponse::processResponse(int status, const QJsonValue & data) {
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -110,18 +109,9 @@ getOrderByIdResponse* getOrderByIdResponse::onEmptyResponse(std::function<void(i
     return this;
 }
 
-getOrderByIdResponse* getOrderByIdResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
 
 getOrderByIdResponse* getOrderByIdResponse::on(const std::function<void(Order)> & callback) {
     m_200_fun = callback;
-    return this;
-}
-
-getOrderByIdResponse* getOrderByIdResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
     return this;
 }
 
@@ -132,11 +122,12 @@ bool getOrderByIdResponse::processResponse(int status, const QJsonValue & data) 
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 200: //Order
+        case 200:{  //Order
             if(!m_200_fun) {
                 logSwaggerWarning("No callback defined for Order - http status: %d", status);
                 return true;
@@ -149,7 +140,8 @@ bool getOrderByIdResponse::processResponse(int status, const QJsonValue & data) 
             m_200_fun(*value);
             
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -168,15 +160,6 @@ deleteOrderResponse* deleteOrderResponse::onEmptyResponse(std::function<void(int
     return this;
 }
 
-deleteOrderResponse* deleteOrderResponse::on(const std::function<void()> & callback) {
-    m_404_fun = callback;
-    return this;
-}
-
-deleteOrderResponse* deleteOrderResponse::on(const std::function<void()> & callback) {
-    m_400_fun = callback;
-    return this;
-}
 
 bool deleteOrderResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
@@ -185,11 +168,13 @@ bool deleteOrderResponse::processResponse(int status, const QJsonValue & data) {
         callbackId = 0;
 
     switch(callbackId) { 
-        case 404:
+        case 404:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
-        case 400:
+        case 400:{ 
+            Q_UNUSED(data);
             if(m_empty_response_function)
                 m_empty_response_function(status);
         }
@@ -206,6 +191,8 @@ using namespace responses;
 
 getInventoryResponse* getInventory (AbstractApiInvoker* invoker) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/store/inventory")).replace(QLatin1String("{format}"),"json");
 
@@ -217,9 +204,19 @@ getInventoryResponse* getInventory (AbstractApiInvoker* invoker) {
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new getInventoryResponse(reply, invoker);
 
 }
@@ -227,6 +224,8 @@ getInventoryResponse* getInventory (AbstractApiInvoker* invoker) {
 placeOrderResponse* placeOrder (AbstractApiInvoker* invoker,
         Optional<Order> body) {
 
+    QByteArray http_method = QByteArrayLiteral("POST");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/store/order")).replace(QLatin1String("{format}"),"json");
 
@@ -238,9 +237,33 @@ placeOrderResponse* placeOrder (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("POST"), queryParams, headers, formParams, parts, contentType);
+    if(body) { 
+        auto bodyVar = * body;
+        if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
+            
+            Q_ASSERT_X(false, "StoreApi::placeOrder", "Order body is not url encodable");
+        }
+        else {
+            auto jsonValue = swagger::serialize(bodyVar);
+            if(jsonValue.isArray())
+                http_body = QJsonDocument(jsonValue.toArray()).toJson(QJsonDocument::Compact);
+            else if(jsonValue.isObject())
+                http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
+        }
+    }
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new placeOrderResponse(reply, invoker);
 
 }
@@ -248,9 +271,11 @@ placeOrderResponse* placeOrder (AbstractApiInvoker* invoker,
 getOrderByIdResponse* getOrderById (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
+    QByteArray http_method = QByteArrayLiteral("GET");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/store/order/{orderId}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "orderId" + "}", to_query_value(orderId));
+    path.replace("{orderId}", to_query_value(orderId));
 
     QUrlQuery queryParams;
 
@@ -260,9 +285,19 @@ getOrderByIdResponse* getOrderById (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("GET"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new getOrderByIdResponse(reply, invoker);
 
 }
@@ -270,9 +305,11 @@ getOrderByIdResponse* getOrderById (AbstractApiInvoker* invoker,
 deleteOrderResponse* deleteOrder (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
+    QByteArray http_method = QByteArrayLiteral("DELETE");
+    QByteArray http_body;
 
     QString path = QString(QLatin1String("/store/order/{orderId}")).replace(QLatin1String("{format}"),"json");
-    path.replaceAll("{" + "orderId" + "}", to_query_value(orderId));
+    path.replace("{orderId}", to_query_value(orderId));
 
     QUrlQuery queryParams;
 
@@ -282,9 +319,19 @@ deleteOrderResponse* deleteOrder (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    QHttpMultiPart* parts = nullptr;
+    
 
-    auto reply = invoker->invoke(path, QByteArrayLiteral("DELETE"), queryParams, headers, formParams, parts, contentType);
+    
+
+    QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
+
+    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     return new deleteOrderResponse(reply, invoker);
 
 }

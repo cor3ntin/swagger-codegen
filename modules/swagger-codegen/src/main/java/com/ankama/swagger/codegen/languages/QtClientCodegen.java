@@ -1,5 +1,6 @@
 package com.ankama.swagger.codegen.languages;
 
+import com.wordnik.swagger.models.Model;
 import com.wordnik.swagger.models.Operation;
 import com.wordnik.swagger.models.parameters.Parameter;
 import com.wordnik.swagger.util.Json;
@@ -71,12 +72,13 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     typeMapping.put("double", "double");
     typeMapping.put("array", "QVector");
     typeMapping.put("map", "QHash");
+    typeMapping.put("file", "QIODevice*");
 
     QtClasses = new HashSet<String> (
         Arrays.asList(
-            "QString", "QVector", "QStringList", "QMap", "QHash", "QTime", "QDate", "QDateTime")
+            "QString", "QVector", "QStringList", "QMap", "QHash", "QTime", "QDate", "QDateTime", "QIODevice")
     );
-    importMapping = new HashMap<String, String>();
+    importMapping.clear();
 
     supportingFiles.clear();
     supportingFiles.add(new SupportingFile("response-header.mustache", sourceFolder, "AbstractResponse.h"));
@@ -154,33 +156,17 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String toModelImport(String name) {
-      if(QtClasses.contains(name))
-          return "#include <" + name + ">";
-      return "#include \"" + name + ".h\"";
+    String iname = name;
+      if(iname.endsWith("*"))
+        iname = iname.substring(0, iname.length() - 1);
+      if(QtClasses.contains(iname))
+          return "#include <" + iname + ">";
+      return "#include \"" + iname + ".h\"";
   }
 
   @Override
   public String toDefaultValue(Property p) {
-    if(p instanceof StringProperty)
-      return "QString::null";
-    else if (p instanceof BooleanProperty)
-      return "false";
-    else if(p instanceof DateProperty)
-      return "{}";
-    else if(p instanceof DateTimeProperty)
-      return "{}";
-    else if (p instanceof DoubleProperty)
-      return ".0";
-    else if (p instanceof FloatProperty)
-      return "0f";
-    else if (p instanceof IntegerProperty)
-      return "0";
-    else if (p instanceof LongProperty)
-      return "0";
-    else if (p instanceof DecimalProperty)
-      return "0";
-
-    return getTypeDeclaration(p) + "()";
+    return "{}";
   }
 
   @Override
@@ -216,9 +202,70 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String toParamName(String name) {
-      String paramName = name.replaceAll("[^a-zA-Z0-9_]","");
-      paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
-      return paramName;
+    String paramName = name.replaceAll("[^a-zA-Z0-9_]","");
+    paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
+    return paramName;
+  }
+
+  @Override
+  public CodegenModel fromModel(String name, Model model) {
+    //put required parameters first
+    CodegenModel m = super.fromModel(name,model);
+    List<CodegenProperty> params = new ArrayList<CodegenProperty>();
+    ListIterator<CodegenProperty> it = m.vars.listIterator();
+    while(it.hasNext()) {
+      CodegenProperty p = it.next();
+      if(p.required) {
+        params.add(p);
+        it.remove();
+      }
+    }
+    params.addAll(m.vars);
+    m.vars = params;
+
+    it = m.vars.listIterator();
+    while(it.hasNext()) {
+      CodegenProperty p = it.next();
+      p.hasMore = it.hasNext();
+      p.secondaryParam = it.hasPrevious();
+    }
+
+    return m;
+  }
+
+  private  List<CodegenParameter> sortCPPFunctionParameters(List<CodegenParameter> parameters) {
+    List<CodegenParameter> required  = new ArrayList<CodegenParameter>();
+    List<CodegenParameter> optionals = new ArrayList<CodegenParameter>();
+    ListIterator<CodegenParameter> it = parameters.listIterator();
+    while(it.hasNext()) {
+      CodegenParameter p = it.next();
+      if(p.required)
+        required.add(p);
+      else
+        optionals.add(p);
+    }
+    required.addAll(optionals);
+
+    it = required.listIterator();
+    while(it.hasNext()) {
+      CodegenParameter p = it.next();
+      p.hasMore = it.hasNext();
+      p.secondaryParam = it.hasPrevious();
+    }
+    return required;
+  }
+
+  @Override
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation) {
+    //put required parameters first
+    CodegenOperation op = super.fromOperation(path, httpMethod, operation);
+    op.allParams = sortCPPFunctionParameters(op.allParams);
+    op.formParams = sortCPPFunctionParameters(op.formParams);
+    op.queryParams = sortCPPFunctionParameters(op.queryParams);
+    op.headerParams = sortCPPFunctionParameters(op.headerParams);
+    op.bodyParams = sortCPPFunctionParameters(op.bodyParams);
+    op.pathParams = sortCPPFunctionParameters(op.pathParams);
+    return op;
   }
 
 

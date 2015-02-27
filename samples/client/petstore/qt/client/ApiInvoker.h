@@ -8,6 +8,7 @@ class QHttpMultiPart;
 class QNetworkReply;
 class QNetworkAccessManager;
 class QNetworkRequest;
+class QIODevice;
 
 namespace swagger {
 
@@ -19,14 +20,14 @@ public:
     virtual QNetworkReply* invoke(const QString & path, const QByteArray & method,
                                   QUrlQuery queryParams, QVariantMap headerParams,
                                   QUrlQuery formParams, QHttpMultiPart* parts,
-                                  const QString & contentType);
+                                  const QString & contentType, const QByteArray & body, QIODevice* device = 0);
 
     virtual QString getBasePath();
     virtual void onError(const AbstractResponse* const response);
 
 protected:
     virtual QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                                  const QByteArray & body, QHttpMultiPart* parts) = 0;
+                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0) = 0;
 
 };
 
@@ -36,7 +37,7 @@ public:
 
 protected:
     QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                          const QByteArray & body, QHttpMultiPart* parts);
+                          const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0);
 
 private:
     QNetworkAccessManager* m_nm;

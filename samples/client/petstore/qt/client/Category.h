@@ -16,7 +16,7 @@ using Optional = boost::optional<T>;
 
 class Category {
 public:
-    Category();
+    
     Category(qint64 id = {},
         const QString& name = {});
 

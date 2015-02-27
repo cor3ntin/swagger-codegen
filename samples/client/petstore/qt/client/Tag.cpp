@@ -5,10 +5,7 @@
 
 namespace swagger {
 
-Tag::Tag()
-    : m_id{ 0 }
-    , m_name{ QString::null }  {
-}
+
 
 Tag::Tag(qint64 id,
         const QString& name) {

@@ -20,24 +20,24 @@ using Optional = boost::optional<T>;
 class Pet {
 public:
     Pet();
-    Pet(qint64 id = {},
-        const Category& category = {},
-        const QString& name,
+    Pet(const QString& name,
         const QStringList& photoUrls,
+        qint64 id = {},
+        const Category& category = {},
         const QVector<Tag>& tags = {},
         const QString& status = {});
-
-    qint64 getId() const;
-    void setId( qint64  id);
-
-    Category getCategory() const;
-    void setCategory(const Category & category);
 
     QString getName() const;
     void setName(const QString & name);
 
     QStringList getPhotoUrls() const;
     void setPhotoUrls(const QStringList & photoUrls);
+
+    qint64 getId() const;
+    void setId( qint64  id);
+
+    Category getCategory() const;
+    void setCategory(const Category & category);
 
     QVector<Tag> getTags() const;
     void setTags(const QVector<Tag> & tags);
@@ -50,10 +50,10 @@ public:
     static Optional<Pet> unserialize(const QJsonObject & json);
 
 private:
-    qint64 m_id;
-    Category m_category;
     QString m_name;
     QStringList m_photoUrls;
+    qint64 m_id;
+    Category m_category;
     QVector<Tag> m_tags;
     QString m_status;
 };

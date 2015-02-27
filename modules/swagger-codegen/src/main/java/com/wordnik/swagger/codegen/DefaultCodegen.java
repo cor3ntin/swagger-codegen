@@ -390,6 +390,7 @@ public class DefaultCodegen {
           m.imports.add(containerType);
         }
       }
+      m.hasRequiredVars = false;
       if(impl.getProperties() != null && impl.getProperties().size() > 0) {
         m.hasVars = true;
         for(String key: impl.getProperties().keySet()) {
@@ -403,8 +404,10 @@ public class DefaultCodegen {
             cp.required = false;
             if(impl.getRequired() != null) {
               for(String req : impl.getRequired()) {
-                if(key.equals(req))
+                if(key.equals(req)) {
                   cp.required = true;
+                  m.hasRequiredVars = true;
+                }
               }
             }
             if(cp.complexType != null && !defaultIncludes.contains(cp.complexType)) {

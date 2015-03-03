@@ -13,7 +13,7 @@ namespace swagger {
 class AbstractRequest : public QObject {
     Q_OBJECT
 public:
-    AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker);
+    AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
     virtual ~AbstractRequest();
     quint16 status() const;
     quint32 duration() const;
@@ -33,6 +33,7 @@ private:
     QNetworkReply* m_reply;
     AbstractApiInvoker::RequestParams m_params;
     AbstractApiInvoker* m_invoker;
+    QStringList m_authSchemes;
 };
 
 }

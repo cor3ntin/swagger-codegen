@@ -26,6 +26,9 @@ namespace responses {
 
 {{#operations}}
 {{#operation}}
+{{#authMethods}}
+//Requires authentification with scheme {{name}} ({{type}})
+{{/authMethods}}
 responses::{{nickname}}Request* {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
                 {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{^required}} = {} {{/required}}{{#hasMore}},
                 {{/hasMore}}{{/allParams}});
@@ -94,7 +97,7 @@ namespace {{nickname}}RequestDetails {
 class {{nickname}}Request : public AbstractRequest {
     Q_OBJECT
 public:
-    {{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker);
+    {{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
 
 Q_SIGNALS:
 {{#responses}}

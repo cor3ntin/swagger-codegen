@@ -8,10 +8,11 @@
 
 namespace swagger {
 
-AbstractRequest::AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker)
+AbstractRequest::AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
     : m_reply(nullptr)
     , m_params(params)
-    , m_invoker(invoker) {
+    , m_invoker(invoker)
+    , m_authSchemes(authSchemes) {
 
 }
 

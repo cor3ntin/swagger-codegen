@@ -15,8 +15,8 @@ namespace {{classname}} {
 namespace responses {
 
 {{#operation}}
-{{nickname}}Request::{{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker)
-    : AbstractRequest(std::move(params), invoker) {
+{{nickname}}Request::{{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
 bool {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
@@ -109,7 +109,7 @@ using namespace responses;
     }{{/formParams.size}}
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
-    auto request = new {{nickname}}Request(std::move(params), invoker);
+    auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
     request->send();
     return request;
 }

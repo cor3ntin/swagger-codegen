@@ -8,47 +8,48 @@
 
 namespace swagger {
 
-AbstractResponse::AbstractResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : m_reply(reply)
+AbstractRequest::AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker)
+    : m_reply(nullptr)
+    , m_params(params)
     , m_invoker(invoker) {
 
-    Q_ASSERT(m_reply);
-    connect(m_reply, &QNetworkReply::finished, this, &AbstractResponse::onReplyFinished);
-    m_reply->setParent(this);
 }
 
-AbstractResponse::~AbstractResponse() {
+void AbstractRequest::send() {
+    m_reply = m_invoker->invoke(m_params);
+    if(!m_reply) {
+        //WTF
+    }
+    connect(m_reply, &QNetworkReply::finished, this, &AbstractRequest::onReplyFinished);
+}
+
+AbstractRequest::~AbstractRequest() {
     m_reply->deleteLater();
 }
 
-quint16 AbstractResponse::status() const {
+quint16 AbstractRequest::status() const {
     if(!isFinished())
         return 0;
     return m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 }
 
-quint32 AbstractResponse::duration() const {
+quint32 AbstractRequest::duration() const {
     if(!isFinished())
         return 0;
     return m_reply->rawHeader("x-duration").toInt(); //returns 0 if fail
 }
 
-bool AbstractResponse::isFinished() const {
+bool AbstractRequest::isFinished() const {
     return m_reply->isFinished();
 }
 
-bool AbstractResponse::success() const {
+bool AbstractRequest::success() const {
     auto s = status();
     return m_reply->error() == QNetworkReply::NoError
-        && s >= 200 && s< 300;
+    && s >= 200 && s< 300;
 }
 
-AbstractResponse* AbstractResponse::onEmptyResponse(std::function<void(int)> fun) {
-    m_empty_response_function = fun;
-    return this;
-}
-
-void AbstractResponse::onReplyFinished() {
+void AbstractRequest::onReplyFinished() {
     bool hasError = false;
     QJsonDocument doc;
     if(m_reply->error() != QNetworkReply::NoError)
@@ -75,7 +76,7 @@ void AbstractResponse::onReplyFinished() {
         }
     }
     else {
-        m_invoker->onError(this);
+        //m_invoker->onError(this);
     }
     if(!parent())
         deleteLater();

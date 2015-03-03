@@ -1,43 +1,55 @@
 #ifndef _SWAGGER_API_INVOKER_
 #define _SWAGGER_API_INVOKER_
 
+#include <tuple>
 #include <QObject>
 #include <QUrlQuery>
+#include <QNetworkRequest>
 
 class QHttpMultiPart;
 class QNetworkReply;
 class QNetworkAccessManager;
-class QNetworkRequest;
 class QIODevice;
+class QSslError;
 
 namespace swagger {
 
 class AbstractResponse;
 class AbstractApiInvoker : public QObject {
-
+    Q_OBJECT
 public:
+    using RequestParams = std::tuple<QNetworkRequest, QByteArray, QByteArray, QHttpMultiPart*, QIODevice*>;
+
+
     AbstractApiInvoker(QObject* parent = nullptr);
-    virtual QNetworkReply* invoke(const QString & path, const QByteArray & method,
-                                  QUrlQuery queryParams, QVariantMap headerParams,
-                                  QUrlQuery formParams, QHttpMultiPart* parts,
-                                  const QString & contentType, const QByteArray & body, QIODevice* device = 0);
+
+    virtual RequestParams prepare(const QString & path, const QByteArray & method,
+                      QUrlQuery queryParams, QVariantMap headerParams,
+                      QUrlQuery formParams, QHttpMultiPart* parts,
+                      const QString & contentType, const QByteArray & body, QIODevice* device = nullptr);
+
+    QNetworkReply* invoke(const RequestParams & params);
+
 
     virtual QString getBasePath();
     virtual void onError(const AbstractResponse* const response);
 
 protected:
-    virtual QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0) = 0;
+    virtual QNetworkReply* invoke(QNetworkRequest request, const QByteArray & method,
+                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = nullptr) = 0;
+private Q_SLOTS:
+    void onSslErrors( const QList<QSslError> & errors );
 
 };
 
 class ApiInvoker : public AbstractApiInvoker {
+    Q_OBJECT
 public:
     ApiInvoker(QObject* parent = nullptr);
 
 protected:
-    QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                          const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0);
+    QNetworkReply* invoke(QNetworkRequest request, const QByteArray & method,
+                          const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = nullptr);
 
 private:
     QNetworkAccessManager* m_nm;

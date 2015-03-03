@@ -3,8 +3,6 @@
 #include "{{classname}}.h"
 #include <QJsonObject>
 
-#include "SwaggerUtils.h"
-
 namespace swagger {
 
 {{#hasRequiredVars}}{{{classname}}}::{{{classname}}}()
@@ -40,15 +38,15 @@ QJsonObject {{classname}}::serialize() const {
     return json;
 }
 
-Optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & json) {
+boost::optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & json) {
     auto it = json.end();
     {{classname}} obj;{{#vars}}
     if((it = json.find("{{name}}")) != std::end(json)) {
-        auto v = swagger::unserialize<{{{datatype}}}>(*it);
-        {{#required}}if(!v) return {};
+        boost::optional<{{{datatype}}}> v = swagger::unserialize<{{{datatype}}}>(*it);
+        {{#required}}if(!v) return boost::optional<{{classname}}>{};
         {{/required}}{{^required}}if(v) {{/required}}obj.{{setter}}(*v);
     }{{#required}}
-    else return {};{{/required}}{{/vars}}
+    else return boost::optional<{{classname}}>{};{{/required}}{{/vars}}
     return obj;
 }
 

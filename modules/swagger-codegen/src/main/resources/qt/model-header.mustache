@@ -3,7 +3,7 @@
 {{/model}}
 {{/models}}
 
-#include <boost/optional/optional.hpp>
+#include "SwaggerUtils.h"
 #include <QStringList> //fixme
 
 class QJsonObject;
@@ -14,10 +14,8 @@ class QJsonObject;
 {{#models}}{{#model}}
 namespace swagger {
 
-template <typename T>
-using Optional = boost::optional<T>;
-
 class {{classname}} {
+
 public:
     {{#hasRequiredVars}}{{classname}}();{{/hasRequiredVars}}
     {{classname}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
@@ -29,15 +27,18 @@ public:
 {{/vars}}
 
     QJsonObject serialize() const;
-    static Optional<{{classname}}> unserialize(const QJsonObject & json);
+    static boost::optional<{{classname}}> unserialize(const QJsonObject & json);
 
 private:
 {{#vars}}    {{{datatype}}} m_{{name}};
 {{/vars}}
 };
 
+template <>
+struct is_model<{{classname}}> : std::true_type {};
 
 }
+Q_DECLARE_METATYPE(swagger::{{classname}});
 
 #endif
 {{/model}}

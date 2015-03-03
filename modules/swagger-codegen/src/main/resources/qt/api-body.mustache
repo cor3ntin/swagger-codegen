@@ -1,5 +1,5 @@
 #include "{{classname}}.h"
-
+#include <array>
 #include <QUrlQuery>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
@@ -15,43 +15,28 @@ namespace {{classname}} {
 namespace responses {
 
 {{#operation}}
-{{nickname}}Response::{{nickname}}Response(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+{{nickname}}Request::{{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker)
+    : AbstractRequest(std::move(params), invoker) {
 }
 
-{{nickname}}Response* {{nickname}}Response::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
-
-{{#responses}}{{#dataType}}
-{{nickname}}Response* {{nickname}}Response::on(const std::function<void({{{dataType}}})> & callback) {
-    m_{{code}}_fun = callback;
-    return this;
-}
-{{/dataType}}{{/responses}}
-bool {{nickname}}Response::processResponse(int status, const QJsonValue & data) {
+bool {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, {{responses.size}}> knownStatus{{ {{#responses}}{{code}}{{#hasMore}},{{/hasMore}} {{/responses}} }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { {{#responses}}
+   switch(callbackId) { {{#responses}}
         case {{code}}:{ {{#dataType}} //{{{dataType}}}
-            if(!m_{{code}}_fun) {
-                logSwaggerWarning("No callback defined for {{{dataType}}} - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<{{{dataType}}}>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize {{{dataType}}}");
                 return false;
             }
-            m_{{code}}_fun(*value);
+            Q_EMIT finished{{code}}(*value);
             {{/dataType}}{{^dataType}}
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);{{/dataType}}
+            Q_EMIT finished{{code}}();
+            {{/dataType}}
+            break;
         }{{/responses}}
         default:
             Q_ASSERT(false);
@@ -68,8 +53,8 @@ using namespace responses;
 {{#operations}}
 {{#operation}}
 
-{{nickname}}Response* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
-        {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}Optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
+{{nickname}}Request* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
+        {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
         {{/hasMore}}{{/allParams}}) {
 
     QByteArray http_method = QByteArrayLiteral("{{httpMethod}}");
@@ -89,7 +74,7 @@ using namespace responses;
     {{#consumes.size}}QStringList contentTypes = {
         {{#consumes}}"{{mediaType}}"{{#hasMore}},{{/hasMore}}{{/consumes}}
     };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 {{/consumes.size}}{{^consumes}}QString contentType(QLatin1String("application/json"));{{/consumes}}
 
     {{#bodyParam}}{{#isFile}}if({{paramName}} &&contentTypes.isEmpty())
@@ -123,9 +108,10 @@ using namespace responses;
     {{/formParams}}
     }{{/formParams.size}}
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
-    return new {{nickname}}Response(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
+    auto request = new {{nickname}}Request(std::move(params), invoker);
+    request->send();
+    return request;
 }
 {{/operation}}
 

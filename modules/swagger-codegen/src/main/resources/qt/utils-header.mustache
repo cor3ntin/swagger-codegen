@@ -51,6 +51,7 @@ inline void set_form_data<QIODevice*>(QHttpMultiPart* & parts, const QString & k
     parts->append(part);
 }
 
+
 template <typename T>
 struct is_model : std::false_type {};
 
@@ -69,6 +70,8 @@ template <typename Key, typename Value> struct is_associative_array<QMap<Key,Val
 template <typename T>
 typename std::enable_if<std::is_same<T, bool>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return false;
     if(!value.isBool())
         return boost::optional<T>{};
     return value.toBool();
@@ -77,6 +80,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<std::is_same<T, QString>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isString())
         return boost::optional<T>{};
     return value.toString();
@@ -85,6 +90,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<std::is_same<T, QDateTime>::value || std::is_same<T, QDate>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isString())
         return boost::optional<T>{};
     auto d = T::fromString(value.toString(), Qt::ISODate);
@@ -96,6 +103,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isDouble())
         return boost::optional<T>{};
     return static_cast<T>(value.toDouble());
@@ -104,6 +113,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<swagger::is_model<T>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isObject())
         return boost::optional<T>{};
     return T::unserialize(value.toObject());
@@ -112,6 +123,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<swagger::is_array<T>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isArray())
         return boost::optional<T>{};
     auto jsonArray = value.toArray();
@@ -129,6 +142,8 @@ unserialize(const QJsonValue & value) {
 template <typename T>
 typename std::enable_if<swagger::is_associative_array<T>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
+    if(value.isNull())
+        return T();
     if(!value.isObject())
         return boost::optional<T>{};
     auto object = value.toObject();
@@ -289,14 +304,24 @@ namespace details {
     template <typename T>
     struct function_traits<const volatile T&&> : public function_traits<T> {};
 
+    template <typename T>
+    struct remove_cr {
+        using type = T;
+    };
+    template <typename T>
+    struct remove_cr<const T&> {
+        using type = T;
+    };
+
+
     template <int N, typename T1, typename T2>
     struct is_convertible : std::integral_constant<bool, false>
     {};
     template <typename T1, typename T2>
     struct is_convertible<1, T1,T2> : std::integral_constant<bool,
-        std::is_same<
-            std::remove_reference<std::remove_const<T1>>,
-            std::remove_reference<std::remove_const<typename function_traits<T2>::FirstArg>>>::value>
+        std::is_same<T1,
+            typename remove_cr<typename function_traits<T2>::FirstArg>::type
+            >::value>
     {};
 
     template <typename T1, typename T2>
@@ -373,6 +398,21 @@ on ## HttpCode (Obj obj, Func func) {                                           
     connect(this, &Api ## Request::finished  ## HttpCode, obj, func);                        \
     return this;                                                                             \
 }
+
+
+//enum serialization
+#define SWAGGER_SERIALIZE_QENUM(o,e,v)  swagger::serialize<QString>(o::staticMetaObject.enumerator\
+    (o::staticMetaObject.indexOfEnumerator(#e)).valueToKey((static_cast<int>(v))))
+
+#define SWAGGER_UNSERIALIZE_QENUM(o,e, k) [](const QJsonValue & json) -> boost::optional<o::e> {\
+    auto key = swagger::unserialize<QString>(json);\
+    if(!key) return {};\
+    int v = o::staticMetaObject.enumerator\
+    (o::staticMetaObject.indexOfEnumerator(#e)).keyToValue(qPrintable(*key));\
+    if (v == -1) return {};\
+    return boost::optional<o::e>{static_cast<o::e>(v)};\
+    }(k)
+
 
 
 #endif

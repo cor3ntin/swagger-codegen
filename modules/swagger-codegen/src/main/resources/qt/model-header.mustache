@@ -15,14 +15,22 @@ class QJsonObject;
 namespace swagger {
 
 class {{classname}} {
-
+    {{#hasEnums}}Q_GADGET{{/hasEnums}}
 public:
+    {{#vars}}{{#isEnum}}
+    enum class {{{datatypeWithEnum}}} {
+        {{#allowableValues}}{{#values}} {{.}},
+        {{/values}}{{/allowableValues}}
+    };
+    Q_ENUMS({{{datatypeWithEnum}}});{{/isEnum}}{{/vars}}
+
     {{#hasRequiredVars}}{{classname}}();{{/hasRequiredVars}}
-    {{classname}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
+    {{classname}}({{#vars}}{{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
         {{/hasMore}}{{/vars}});
 
-{{#vars}}    {{{datatype}}} {{getter}}() const;
-    void {{setter}}({{^isPrimitiveType}}const{{/isPrimitiveType}} {{{datatype}}} {{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}});
+    {{#vars}}
+    {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}} {{getter}}() const;
+    void {{setter}}({{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}});
 
 {{/vars}}
 
@@ -30,7 +38,7 @@ public:
     static boost::optional<{{classname}}> unserialize(const QJsonObject & json);
 
 private:
-{{#vars}}    {{{datatype}}} m_{{name}};
+{{#vars}}    {{{datatypeWithEnum}}} m_{{name}};
 {{/vars}}
 };
 

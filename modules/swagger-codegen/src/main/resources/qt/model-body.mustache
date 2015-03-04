@@ -2,6 +2,7 @@
 {{#model}}
 #include "{{classname}}.h"
 #include <QJsonObject>
+{{#hasEnums}}#include <QMetaEnum>{{/hasEnums}}
 
 namespace swagger {
 
@@ -10,7 +11,7 @@ namespace swagger {
     , {{/hasMore}}{{/vars}} {{/hasVars}} {
 }{{/hasRequiredVars}}
 
-{{{classname}}}::{{{classname}}}({{#vars}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}{{#hasMore}},
+{{{classname}}}::{{{classname}}}({{#vars}}{{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}{{#hasMore}},
         {{/hasMore}}{{/vars}}) {
 
 {{#vars}}    {{setter}}({{name}});
@@ -19,11 +20,11 @@ namespace swagger {
 
 
 {{#vars}}
-{{{datatype}}} {{{classname}}}::{{getter}}() const {
+{{#isEnum}}{{{classname}}}::{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}} {{{classname}}}::{{getter}}() const {
     return m_{{name}};
 }
 
-void  {{{classname}}}::{{setter}}({{^isPrimitiveType}}const{{/isPrimitiveType}} {{{datatype}}} {{^isPrimitiveType}}&{{/isPrimitiveType}} {{name}}) {
+void  {{{classname}}}::{{setter}}({{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}) {
     m_{{name}} = {{name}};
 }
 
@@ -33,7 +34,9 @@ void  {{{classname}}}::{{setter}}({{^isPrimitiveType}}const{{/isPrimitiveType}} 
 QJsonObject {{classname}}::serialize() const {
     QJsonObject json;
 
-    {{#vars}}json.insert("{{name}}", swagger::serialize(m_{{name}}));
+    {{#vars}}
+    {{#isEnum}}json.insert("{{name}}", SWAGGER_SERIALIZE_QENUM({{classname}}, {{{datatypeWithEnum}}}, m_{{name}}));{{/isEnum}}
+    {{^isEnum}}json.insert("{{name}}", swagger::serialize(m_{{name}}));{{/isEnum}}
     {{/vars}}
     return json;
 }
@@ -42,11 +45,11 @@ boost::optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & js
     auto it = json.end();
     {{classname}} obj;{{#vars}}
     if((it = json.find("{{name}}")) != std::end(json)) {
-        boost::optional<{{{datatype}}}> v = swagger::unserialize<{{{datatype}}}>(*it);
-        {{#required}}if(!v) return boost::optional<{{classname}}>{};
+        auto v = {{#isEnum}}SWAGGER_UNSERIALIZE_QENUM({{classname}}, {{{datatypeWithEnum}}}, *it){{/isEnum}}{{^isEnum}}swagger::unserialize<{{{datatype}}}>(*it){{/isEnum}};
+        {{#required}}if(!v) return {};
         {{/required}}{{^required}}if(v) {{/required}}obj.{{setter}}(*v);
     }{{#required}}
-    else return boost::optional<{{classname}}>{};{{/required}}{{/vars}}
+    else return {};{{/required}}{{/vars}}
     return obj;
 }
 

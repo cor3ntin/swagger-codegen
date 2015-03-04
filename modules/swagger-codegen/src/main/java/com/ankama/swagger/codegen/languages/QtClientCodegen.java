@@ -6,6 +6,7 @@ import com.wordnik.swagger.models.parameters.Parameter;
 import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.codegen.*;
 import com.wordnik.swagger.models.properties.*;
+import org.apache.commons.lang.StringUtils;
 import sun.org.mozilla.javascript.optimizer.*;
 
 import java.util.*;
@@ -32,33 +33,34 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     outputFolder = "generated-code/qt/";
     modelTemplateFiles.put("model-header.mustache", ".h");
     modelTemplateFiles.put("model-body.mustache", ".cpp");
-    apiTemplateFiles.put("api-header.mustache", ".h");
+    apiTemplateFiles.put("api-header-public.mustache", ".h");
     apiTemplateFiles.put("api-body.mustache", ".cpp");
+    apiTemplateFiles.put("api-header.mustache", "_p.h");
     templateDir = "qt";
     modelPackage = "";
 
     defaultIncludes = new HashSet<String>();
     languageSpecificPrimitives = new HashSet<String>(
-            Arrays.asList(
-                "bool",
-                "int",
-                "long", "double", "float",
-                "qint8", "qint16", "qint32", "qint64",
-                "quint8", "quint16", "quint32", "quint64"
-            )
+        Arrays.asList(
+            "bool",
+            "int",
+            "long", "double", "float",
+            "qint8", "qint16", "qint32", "qint64",
+            "quint8", "quint16", "quint32", "quint64"
+        )
     );
 
     reservedWords = new HashSet<String>(
-      Arrays.asList(
-        "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool", "break", "case", "catch", "char", "char16_t",
-        "char32_t", "class", "compl", "concept", "const", "constexpr", "const_cast", "continue",
-        "decltype", "default", "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit",
-        "export", "extern", "false", "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable", "namespace", "new",
-        "noexcept", "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected", "public",
-        "register", "reinterpret_cast", "requires", "return", "short", "signed", "sizeof", "static", "static_assert",
-        "static_cast", "struct", "switch", "template", "this", "thread_local", "throw", "true", "try", "typedef", "typeid",
-        "typename", "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
-      ));
+        Arrays.asList(
+            "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool", "break", "case", "catch", "char", "char16_t",
+            "char32_t", "class", "compl", "concept", "const", "constexpr", "const_cast", "continue",
+            "decltype", "default", "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit",
+            "export", "extern", "false", "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable", "namespace", "new",
+            "noexcept", "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected", "public",
+            "register", "reinterpret_cast", "requires", "return", "short", "signed", "sizeof", "static", "static_assert",
+            "static_cast", "struct", "switch", "template", "this", "thread_local", "throw", "true", "try", "typedef", "typeid",
+            "typename", "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
+        ));
 
     super.typeMapping = new HashMap<String, String>();
 
@@ -70,19 +72,20 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     typeMapping.put("long", "qint64");
     typeMapping.put("boolean", "bool");
     typeMapping.put("double", "double");
+    typeMapping.put("number", "double");
     typeMapping.put("array", "QVector");
     typeMapping.put("map", "QHash");
     typeMapping.put("file", "QIODevice*");
 
-    QtClasses = new HashSet<String> (
+    QtClasses = new HashSet<String>(
         Arrays.asList(
             "QString", "QVector", "QStringList", "QMap", "QHash", "QTime", "QDate", "QDateTime", "QIODevice")
     );
     importMapping.clear();
 
     supportingFiles.clear();
-    supportingFiles.add(new SupportingFile("response-header.mustache", sourceFolder, "AbstractResponse.h"));
-    supportingFiles.add(new SupportingFile("response-body.mustache", sourceFolder, "AbstractResponse.cpp"));
+    supportingFiles.add(new SupportingFile("response-header.mustache", sourceFolder, "AbstractRequest.h"));
+    supportingFiles.add(new SupportingFile("response-body.mustache", sourceFolder, "AbstractRequest.cpp"));
     supportingFiles.add(new SupportingFile("invoker-header.mustache", sourceFolder, "ApiInvoker.h"));
     supportingFiles.add(new SupportingFile("invoker-body.mustache", sourceFolder, "ApiInvoker.cpp"));
     supportingFiles.add(new SupportingFile("utils-header.mustache", sourceFolder, "SwaggerUtils.h"));
@@ -95,13 +98,11 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
       MapProperty ap = (MapProperty) p;
       String inner = getSwaggerType(ap.getAdditionalProperties());
       return instantiationTypes.get("map");
-    }
-    else if (p instanceof ArrayProperty) {
+    } else if (p instanceof ArrayProperty) {
       ArrayProperty ap = (ArrayProperty) p;
       String inner = getSwaggerType(ap.getItems());
       return instantiationTypes.get("array");
-    }
-    else
+    } else
       return null;
   }
 
@@ -109,29 +110,27 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   public String getSwaggerType(Property p) {
     String swaggerType = super.getSwaggerType(p);
     String type = null;
-    if(typeMapping.containsKey(swaggerType)) {
+    if (typeMapping.containsKey(swaggerType)) {
       type = typeMapping.get(swaggerType);
-      if(languageSpecificPrimitives.contains(type))
+      if (languageSpecificPrimitives.contains(type))
         return toModelName(type);
-    }
-    else
+    } else
       type = swaggerType;
     return toModelName(type);
   }
 
   @Override
   public String getTypeDeclaration(Property p) {
-    if(p instanceof ArrayProperty) {
+    if (p instanceof ArrayProperty) {
       ArrayProperty ap = (ArrayProperty) p;
       Property inner = ap.getItems();
       String innerType = getTypeDeclaration(inner);
 
-      if(innerType.compareTo("QString") == 0)
-          return "QStringList";
+      if (innerType.compareTo("QString") == 0)
+        return "QStringList";
 
       return getSwaggerType(p) + "<" + innerType + ">";
-    }
-    else if (p instanceof MapProperty) {
+    } else if (p instanceof MapProperty) {
       MapProperty mp = (MapProperty) p;
       Property inner = mp.getAdditionalProperties();
 
@@ -142,14 +141,13 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String toModelName(String type) {
-    if(typeMapping.keySet().contains(type) ||
-      typeMapping.values().contains(type) ||
-      importMapping.values().contains(type) ||
-      defaultIncludes.contains(type) ||
-      languageSpecificPrimitives.contains(type)) {
+    if (typeMapping.keySet().contains(type) ||
+        typeMapping.values().contains(type) ||
+        importMapping.values().contains(type) ||
+        defaultIncludes.contains(type) ||
+        languageSpecificPrimitives.contains(type)) {
       return type;
-    }
-    else {
+    } else {
       return Character.toUpperCase(type.charAt(0)) + type.substring(1);
     }
   }
@@ -157,11 +155,11 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   @Override
   public String toModelImport(String name) {
     String iname = name;
-      if(iname.endsWith("*"))
-        iname = iname.substring(0, iname.length() - 1);
-      if(QtClasses.contains(iname))
-          return "#include <" + iname + ">";
-      return "#include \"" + iname + ".h\"";
+    if (iname.endsWith("*"))
+      iname = iname.substring(0, iname.length() - 1);
+    if (QtClasses.contains(iname))
+      return "#include <" + iname + ">";
+    return "#include \"" + iname + ".h\"";
   }
 
   @Override
@@ -195,14 +193,14 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String toVarName(String name) {
-    String paramName = name.replaceAll("[^a-zA-Z0-9_]","");
+    String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
     return paramName;
   }
 
   @Override
   public String toParamName(String name) {
-    String paramName = name.replaceAll("[^a-zA-Z0-9_]","");
+    String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
     return paramName;
   }
@@ -210,12 +208,12 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   @Override
   public CodegenModel fromModel(String name, Model model) {
     //put required parameters first
-    CodegenModel m = super.fromModel(name,model);
+    CodegenModel m = super.fromModel(name, model);
     List<CodegenProperty> params = new ArrayList<CodegenProperty>();
     ListIterator<CodegenProperty> it = m.vars.listIterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       CodegenProperty p = it.next();
-      if(p.required) {
+      if (p.required) {
         params.add(p);
         it.remove();
       }
@@ -224,13 +222,23 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     m.vars = params;
 
     it = m.vars.listIterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       CodegenProperty p = it.next();
       p.hasMore = it.hasNext();
       p.secondaryParam = it.hasPrevious();
     }
 
     return m;
+  }
+
+  @Override
+  public CodegenProperty fromProperty(String name, Property p) {
+    CodegenProperty cp = super.fromProperty(name, p);
+    if(cp.isEnum)
+      cp.datatypeWithEnum = StringUtils.capitalize(cp.name);
+    if(cp.getter != null)
+      cp.getter = name;
+    return cp;
   }
 
   private  List<CodegenParameter> sortCPPFunctionParameters(List<CodegenParameter> parameters) {

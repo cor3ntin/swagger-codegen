@@ -17,7 +17,7 @@ AbstractApiInvoker::AbstractApiInvoker(QObject* parent)
 
 
 QString AbstractApiInvoker::getBasePath() {
-    return QStringLiteral("https://haapi.ankama.lan/json/Ankama/v1");
+    return QStringLiteral("{{basePath}}");
 }
 
 template <typename First>
@@ -61,16 +61,18 @@ AbstractApiInvoker::RequestParams AbstractApiInvoker::prepare(const QString & pa
 
 }
 
-QNetworkReply* AbstractApiInvoker::invoke(const RequestParams &params) {
-    QNetworkReply*  reply = invoke(std::get<0>(params),
+AbstractApiInvoker::InvokeResult AbstractApiInvoker::invoke(const RequestParams &params, const AuthSchemes & authSchemes) {
+    InvokeResult result = invoke(std::get<0>(params),
+                  authSchemes,
                   std::get<1>(params),
                   std::get<2>(params),
                   std::get<3>(params),
                   std::get<4>(params));
 
-    connect(reply, SIGNAL(sslErrors(const QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)));
+    if(result.reply)
+        connect(result.reply, SIGNAL(sslErrors(const QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)));
 
-    return reply;
+    return result;
 }
 
 void AbstractApiInvoker::onError(const AbstractResponse* const) {
@@ -91,8 +93,11 @@ ApiInvoker::ApiInvoker(QObject* parent)
     , m_nm(new QNetworkAccessManager(this)) {
 }
 
-QNetworkReply* ApiInvoker::invoke(QNetworkRequest request, const QByteArray & method,
+AbstractApiInvoker::InvokeResult ApiInvoker::invoke(QNetworkRequest request, const AuthSchemes & authSchemes, const QByteArray & method,
                                   const QByteArray & body, QHttpMultiPart* parts, QIODevice* device) {
+
+    if(!authSchemes.isEmpty())
+        return {nullptr, InvokeResult::AuthSchemeUnavailable};
 
     if(method == "GET") {
         return m_nm->get(request);
@@ -117,7 +122,7 @@ QNetworkReply* ApiInvoker::invoke(QNetworkRequest request, const QByteArray & me
     if(method == "OPTIONS") {
         return m_nm->sendCustomRequest(request, "OPTIONS");
     }
-    return nullptr;
+    return InvokeResult{nullptr};
 }
 
 

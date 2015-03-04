@@ -1,7 +1,8 @@
-#include "{{classname}}.h"
+#include "{{classname}}_p.h"
 #include <array>
 #include <QUrlQuery>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
 
@@ -19,7 +20,9 @@ namespace responses {
     : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-bool {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
+AbstractRequest::Error {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
+
     int callbackId = status;
     static const std::array<int, {{responses.size}}> knownStatus{{ {{#responses}}{{code}}{{#hasMore}},{{/hasMore}} {{/responses}} }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
@@ -30,18 +33,18 @@ bool {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
             auto value = swagger::unserialize<{{{dataType}}}>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize {{{dataType}}}");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
             Q_EMIT finished{{code}}(*value);
             {{/dataType}}{{^dataType}}
             Q_EMIT finished{{code}}();
             {{/dataType}}
-            break;
+            return NoError;
         }{{/responses}}
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
 {{/operation}}
@@ -50,8 +53,12 @@ bool {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
 
 using namespace responses;
 
+namespace operations {
+
 {{#operations}}
 {{#operation}}
+
+
 
 {{nickname}}Request* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
         {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
@@ -98,7 +105,7 @@ using namespace responses;
     }
     {{/bodyParam}}
 
-    QHttpMultiPart* parts = nullptr;{{#formParams.size}}
+    QHttpMultiPart* parts = nullptr;{{#formParams.size > 0}}
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
     {{#formParams}}        {{^required}}if({{paramName}}){{/required}}set_form_data(parts,"{{paramName}}", {{#notFile}}{{^required}}*{{/required}}{{/notFile}}{{paramName}});
     {{/formParams}}
@@ -106,7 +113,7 @@ using namespace responses;
     else {
     {{#formParams}}{{#notFile}}        {{^required}}if({{paramName}}){{/required}}formParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/notFile}}
     {{/formParams}}
-    }{{/formParams.size}}
+    }{{/formParams.size > 0}}
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
     auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
@@ -114,6 +121,8 @@ using namespace responses;
     return request;
 }
 {{/operation}}
+
+}
 
 } //namespace {{classname}}
 {{/operations}}

@@ -4,7 +4,7 @@
 {{#imports}}{{{import}}}
 {{/imports}}
 #include <type_traits>
-#include "AbstractResponse.h"
+#include "AbstractRequest.h"
 #include "ApiInvoker.h"
 #include "SwaggerUtils.h"
 
@@ -23,7 +23,7 @@ namespace responses {
 }
 {{/operations}}
 
-
+namespace operations {
 {{#operations}}
 {{#operation}}
 {{#authMethods}}
@@ -34,6 +34,7 @@ responses::{{nickname}}Request* {{nickname}}(AbstractApiInvoker* invoker{{#hasPa
                 {{/hasMore}}{{/allParams}});
 
 {{/operation}}
+}
 
 
 {{#operations}}
@@ -108,11 +109,18 @@ public:
 {{#responses}}
     SWAGGER_SMART_SLOT({{nickname}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}})
 {{/responses}}
-
-
-
+    template <typename... Args>
+    {{nickname}}Request* then(Args... args) {
+        connect(this, &AbstractRequest::done, std::forward<Args>(args)...);
+        return this;
+    }
+    template <typename... Args>
+    {{nickname}}Request* onUnexpectedError(Args... args) {
+        connect(this, &AbstractRequest::failed, std::forward<Args>(args)...);
+        return this;
+    }
 protected:
-    bool processResponse(int status, const QJsonValue & data);
+    AbstractRequest::Error processResponse(int status, const QJsonValue & data);
 
 private:
 };

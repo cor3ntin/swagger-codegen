@@ -412,6 +412,9 @@ public class DefaultCodegen {
                 }
               }
             }
+            if(cp.isEnum)
+              m.hasEnums = true;
+
             if(cp.complexType != null && !defaultIncludes.contains(cp.complexType)) {
               m.imports.add(cp.complexType);
             }
@@ -477,6 +480,7 @@ public class DefaultCodegen {
       if(np.getMaximum() != null)
         allowableValues.put("max", np.getMaximum());
       property.allowableValues = allowableValues;
+
     }
 
     if(p instanceof StringProperty) {

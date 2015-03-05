@@ -45,7 +45,7 @@ public:
     InvokeResult invoke(const RequestParams & params, const AuthSchemes & authSchemes);
 
 
-    virtual QString getBasePath();
+    virtual QString getBasePath() const;
 
 Q_SIGNALS:
     void authSchemesConfigurationChanged();

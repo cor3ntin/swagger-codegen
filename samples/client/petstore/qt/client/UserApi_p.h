@@ -28,29 +28,29 @@ namespace responses {
 }
 
 namespace operations {
-responses::createUserRequest* createUser(AbstractApiInvoker* invoker,
+Sender<responses::createUserRequest> createUser(AbstractApiInvoker* invoker,
                 boost::optional<User> body = {} );
 
-responses::createUsersWithArrayInputRequest* createUsersWithArrayInput(AbstractApiInvoker* invoker,
+Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput(AbstractApiInvoker* invoker,
                 boost::optional<QVector<User>> body = {} );
 
-responses::createUsersWithListInputRequest* createUsersWithListInput(AbstractApiInvoker* invoker,
+Sender<responses::createUsersWithListInputRequest> createUsersWithListInput(AbstractApiInvoker* invoker,
                 boost::optional<QVector<User>> body = {} );
 
-responses::loginUserRequest* loginUser(AbstractApiInvoker* invoker,
+Sender<responses::loginUserRequest> loginUser(AbstractApiInvoker* invoker,
                 boost::optional<QString> username = {} ,
                 boost::optional<QString> password = {} );
 
-responses::logoutUserRequest* logoutUser(AbstractApiInvoker* invoker);
+Sender<responses::logoutUserRequest> logoutUser(AbstractApiInvoker* invoker);
 
-responses::getUserByNameRequest* getUserByName(AbstractApiInvoker* invoker,
+Sender<responses::getUserByNameRequest> getUserByName(AbstractApiInvoker* invoker,
                 const QString& username);
 
-responses::updateUserRequest* updateUser(AbstractApiInvoker* invoker,
+Sender<responses::updateUserRequest> updateUser(AbstractApiInvoker* invoker,
                 const QString& username,
                 boost::optional<User> body = {} );
 
-responses::deleteUserRequest* deleteUser(AbstractApiInvoker* invoker,
+Sender<responses::deleteUserRequest> deleteUser(AbstractApiInvoker* invoker,
                 const QString& username);
 
 }
@@ -470,6 +470,10 @@ class createUserRequest : public AbstractRequest {
     Q_OBJECT
 public:
     createUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    createUserRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished0();
@@ -496,6 +500,10 @@ class createUsersWithArrayInputRequest : public AbstractRequest {
     Q_OBJECT
 public:
     createUsersWithArrayInputRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    createUsersWithArrayInputRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished0();
@@ -522,6 +530,10 @@ class createUsersWithListInputRequest : public AbstractRequest {
     Q_OBJECT
 public:
     createUsersWithListInputRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    createUsersWithListInputRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished0();
@@ -548,6 +560,10 @@ class loginUserRequest : public AbstractRequest {
     Q_OBJECT
 public:
     loginUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    loginUserRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished200(QString);
@@ -576,6 +592,10 @@ class logoutUserRequest : public AbstractRequest {
     Q_OBJECT
 public:
     logoutUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    logoutUserRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished0();
@@ -602,6 +622,10 @@ class getUserByNameRequest : public AbstractRequest {
     Q_OBJECT
 public:
     getUserByNameRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    getUserByNameRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();
@@ -632,6 +656,10 @@ class updateUserRequest : public AbstractRequest {
     Q_OBJECT
 public:
     updateUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    updateUserRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();
@@ -660,6 +688,10 @@ class deleteUserRequest : public AbstractRequest {
     Q_OBJECT
 public:
     deleteUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    deleteUserRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();

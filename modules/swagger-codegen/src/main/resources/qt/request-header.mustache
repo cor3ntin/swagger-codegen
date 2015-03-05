@@ -26,6 +26,9 @@ public:
 
     AbstractRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
     virtual ~AbstractRequest();
+
+    void setRawHeader(const QByteArray & k, const QByteArray & v);
+
     quint16 status() const;
     quint32 duration() const;
     bool isFinished() const;
@@ -36,6 +39,7 @@ public:
     QByteArray header(const QByteArray & key) const;
 
     QNetworkReply* reply() const;
+
     void setAutoDetete(bool);
 
 public Q_SLOTS:

@@ -140,6 +140,18 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   }
 
   @Override
+  public String getEnumDeclaration(String enumName, Property container) {
+    String type = StringUtils.capitalize(enumName);
+    if(container instanceof ArrayProperty) {
+      return "QVector<" + type + ">";
+    }
+    if(container instanceof MapProperty) {
+      return "QHash<QString, " + type + ">";
+    }
+    return type;
+  }
+
+  @Override
   public String toModelName(String type) {
     if (typeMapping.keySet().contains(type) ||
         typeMapping.values().contains(type) ||
@@ -234,8 +246,6 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   @Override
   public CodegenProperty fromProperty(String name, Property p) {
     CodegenProperty cp = super.fromProperty(name, p);
-    if(cp.isEnum)
-      cp.datatypeWithEnum = StringUtils.capitalize(cp.name);
     if(cp.getter != null)
       cp.getter = name;
     return cp;

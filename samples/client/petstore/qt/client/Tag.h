@@ -17,16 +17,16 @@ public:
     
 
     
-    Tag(qint64 id = {},
-        const QString& name = {});
+    Tag(const qint64 & id = {},
+        const QString & name = {});
 
     
     qint64 id() const;
-    void setId(qint64 id);
+    void setId(const qint64 & id);
 
 
     QString name() const;
-    void setName(const QString& name);
+    void setName(const QString & name);
 
 
     QJsonObject serialize() const;
@@ -37,10 +37,11 @@ private:
     QString m_name;
 };
 
-template <>
-struct is_model<Tag> : std::true_type {};
+
+SWAGGER_DECLARE_MODEL(Tag);
 
 }
+
 Q_DECLARE_METATYPE(swagger::Tag);
 
 #endif

@@ -6,27 +6,31 @@ namespace swagger {
 
 
 
-Tag::Tag(qint64 id,
-        const QString& name) {
+
+
+
+
+Tag::Tag(const qint64 & id,
+        const QString & name) {
 
     setId(id);
     setName(name);
 }
 
 
-qint64 Tag::id() const {
+auto Tag::id() const -> qint64 {
     return m_id;
 }
 
-void  Tag::setId(qint64 id) {
+void  Tag::setId(const qint64 & id) {
     m_id = id;
 }
 
-QString Tag::name() const {
+auto Tag::name() const -> QString {
     return m_name;
 }
 
-void  Tag::setName(const QString& name) {
+void  Tag::setName(const QString & name) {
     m_name = name;
 }
 
@@ -36,9 +40,7 @@ QJsonObject Tag::serialize() const {
     QJsonObject json;
 
     
-    
     json.insert("id", swagger::serialize(m_id));
-    
     
     json.insert("name", swagger::serialize(m_name));
     

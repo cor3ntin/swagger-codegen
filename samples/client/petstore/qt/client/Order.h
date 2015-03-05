@@ -25,36 +25,36 @@ public:
     Q_ENUMS(Status);
 
     
-    Order(qint64 id = {},
-        qint64 petId = {},
-        qint32 quantity = {},
-        const QDateTime& shipDate = {},
-        Status status = {},
-        bool complete = {});
+    Order(const qint64 & id = {},
+        const qint64 & petId = {},
+        const qint32 & quantity = {},
+        const QDateTime & shipDate = {},
+        const Status & status = {},
+        const bool & complete = {});
 
     
     qint64 id() const;
-    void setId(qint64 id);
+    void setId(const qint64 & id);
 
 
     qint64 petId() const;
-    void setPetId(qint64 petId);
+    void setPetId(const qint64 & petId);
 
 
     qint32 quantity() const;
-    void setQuantity(qint32 quantity);
+    void setQuantity(const qint32 & quantity);
 
 
     QDateTime shipDate() const;
-    void setShipDate(const QDateTime& shipDate);
+    void setShipDate(const QDateTime & shipDate);
 
 
     Status status() const;
-    void setStatus(Status status);
+    void setStatus(const Status & status);
 
 
     bool complete() const;
-    void setComplete(bool complete);
+    void setComplete(const bool & complete);
 
 
     QJsonObject serialize() const;
@@ -69,10 +69,13 @@ private:
     bool m_complete;
 };
 
-template <>
-struct is_model<Order> : std::true_type {};
+
+SWAGGER_DECLARE_MODEL(Order);
+
+SWAGGER_DECLARE_ENUM(Order, Status);
 
 }
+
 Q_DECLARE_METATYPE(swagger::Order);
 
 #endif

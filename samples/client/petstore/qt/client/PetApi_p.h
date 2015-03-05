@@ -29,39 +29,39 @@ namespace responses {
 
 namespace operations {
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::updatePetRequest* updatePet(AbstractApiInvoker* invoker,
+Sender<responses::updatePetRequest> updatePet(AbstractApiInvoker* invoker,
                 boost::optional<Pet> body = {} );
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::addPetRequest* addPet(AbstractApiInvoker* invoker,
+Sender<responses::addPetRequest> addPet(AbstractApiInvoker* invoker,
                 boost::optional<Pet> body = {} );
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::findPetsByStatusRequest* findPetsByStatus(AbstractApiInvoker* invoker,
+Sender<responses::findPetsByStatusRequest> findPetsByStatus(AbstractApiInvoker* invoker,
                 boost::optional<QStringList> status = {} );
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::findPetsByTagsRequest* findPetsByTags(AbstractApiInvoker* invoker,
+Sender<responses::findPetsByTagsRequest> findPetsByTags(AbstractApiInvoker* invoker,
                 boost::optional<QStringList> tags = {} );
 
 //Requires authentification with scheme api_key (apiKey)
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::getPetByIdRequest* getPetById(AbstractApiInvoker* invoker,
+Sender<responses::getPetByIdRequest> getPetById(AbstractApiInvoker* invoker,
                 const qint64& petId);
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::updatePetWithFormRequest* updatePetWithForm(AbstractApiInvoker* invoker,
+Sender<responses::updatePetWithFormRequest> updatePetWithForm(AbstractApiInvoker* invoker,
                 const QString& petId,
                 boost::optional<QString> name = {} ,
                 boost::optional<QString> status = {} );
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::deletePetRequest* deletePet(AbstractApiInvoker* invoker,
+Sender<responses::deletePetRequest> deletePet(AbstractApiInvoker* invoker,
                 const qint64& petId,
                 boost::optional<QString> api_key = {} );
 
 //Requires authentification with scheme petstore_auth (oauth2)
-responses::uploadFileRequest* uploadFile(AbstractApiInvoker* invoker,
+Sender<responses::uploadFileRequest> uploadFile(AbstractApiInvoker* invoker,
                 const qint64& petId,
                 boost::optional<QString> additionalMetadata = {} ,
                 QIODevice* file = {} );
@@ -491,6 +491,10 @@ class updatePetRequest : public AbstractRequest {
     Q_OBJECT
 public:
     updatePetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    updatePetRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished405();
@@ -521,6 +525,10 @@ class addPetRequest : public AbstractRequest {
     Q_OBJECT
 public:
     addPetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    addPetRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished405();
@@ -547,6 +555,10 @@ class findPetsByStatusRequest : public AbstractRequest {
     Q_OBJECT
 public:
     findPetsByStatusRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    findPetsByStatusRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished200(QVector<Pet>);
@@ -575,6 +587,10 @@ class findPetsByTagsRequest : public AbstractRequest {
     Q_OBJECT
 public:
     findPetsByTagsRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    findPetsByTagsRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished200(QVector<Pet>);
@@ -603,6 +619,10 @@ class getPetByIdRequest : public AbstractRequest {
     Q_OBJECT
 public:
     getPetByIdRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    getPetByIdRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();
@@ -633,6 +653,10 @@ class updatePetWithFormRequest : public AbstractRequest {
     Q_OBJECT
 public:
     updatePetWithFormRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    updatePetWithFormRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished405();
@@ -659,6 +683,10 @@ class deletePetRequest : public AbstractRequest {
     Q_OBJECT
 public:
     deletePetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    deletePetRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished400();
@@ -685,6 +713,10 @@ class uploadFileRequest : public AbstractRequest {
     Q_OBJECT
 public:
     uploadFileRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    uploadFileRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished0();

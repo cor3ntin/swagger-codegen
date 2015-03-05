@@ -6,27 +6,31 @@ namespace swagger {
 
 
 
-Category::Category(qint64 id,
-        const QString& name) {
+
+
+
+
+Category::Category(const qint64 & id,
+        const QString & name) {
 
     setId(id);
     setName(name);
 }
 
 
-qint64 Category::id() const {
+auto Category::id() const -> qint64 {
     return m_id;
 }
 
-void  Category::setId(qint64 id) {
+void  Category::setId(const qint64 & id) {
     m_id = id;
 }
 
-QString Category::name() const {
+auto Category::name() const -> QString {
     return m_name;
 }
 
-void  Category::setName(const QString& name) {
+void  Category::setName(const QString & name) {
     m_name = name;
 }
 
@@ -36,9 +40,7 @@ QJsonObject Category::serialize() const {
     QJsonObject json;
 
     
-    
     json.insert("id", swagger::serialize(m_id));
-    
     
     json.insert("name", swagger::serialize(m_name));
     

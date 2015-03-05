@@ -260,7 +260,7 @@ namespace operations {
 
 
 
-updatePetRequest* updatePet (AbstractApiInvoker* invoker,
+Sender<responses::updatePetRequest> updatePet (AbstractApiInvoker* invoker,
         boost::optional<Pet> body) {
 
     QByteArray http_method = QByteArrayLiteral("PUT");
@@ -299,16 +299,21 @@ updatePetRequest* updatePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new updatePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-addPetRequest* addPet (AbstractApiInvoker* invoker,
+Sender<responses::addPetRequest> addPet (AbstractApiInvoker* invoker,
         boost::optional<Pet> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -347,16 +352,21 @@ addPetRequest* addPet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new addPetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-findPetsByStatusRequest* findPetsByStatus (AbstractApiInvoker* invoker,
+Sender<responses::findPetsByStatusRequest> findPetsByStatus (AbstractApiInvoker* invoker,
         boost::optional<QStringList> status) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -378,16 +388,21 @@ findPetsByStatusRequest* findPetsByStatus (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new findPetsByStatusRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-findPetsByTagsRequest* findPetsByTags (AbstractApiInvoker* invoker,
+Sender<responses::findPetsByTagsRequest> findPetsByTags (AbstractApiInvoker* invoker,
         boost::optional<QStringList> tags) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -409,16 +424,21 @@ findPetsByTagsRequest* findPetsByTags (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new findPetsByTagsRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-getPetByIdRequest* getPetById (AbstractApiInvoker* invoker,
+Sender<responses::getPetByIdRequest> getPetById (AbstractApiInvoker* invoker,
         const qint64& petId) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -440,16 +460,21 @@ getPetByIdRequest* getPetById (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getPetByIdRequest(std::move(params), invoker, QStringList{ "api_key","petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-updatePetWithFormRequest* updatePetWithForm (AbstractApiInvoker* invoker,
+Sender<responses::updatePetWithFormRequest> updatePetWithForm (AbstractApiInvoker* invoker,
         const QString& petId,
         boost::optional<QString> name,
         boost::optional<QString> status) {
@@ -477,16 +502,25 @@ updatePetWithFormRequest* updatePetWithForm (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+            if(name)set_form_data(parts,"name", *name);
+            if(status)set_form_data(parts,"status", *status);
+    
+    }
+    else {
+            if(name)formParams.addQueryItem("name", to_query_value(*name));
+            if(status)formParams.addQueryItem("status", to_query_value(*status));
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new updatePetWithFormRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-deletePetRequest* deletePet (AbstractApiInvoker* invoker,
+Sender<responses::deletePetRequest> deletePet (AbstractApiInvoker* invoker,
         const qint64& petId,
         boost::optional<QString> api_key) {
 
@@ -510,16 +544,21 @@ deletePetRequest* deletePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deletePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 
 
 
-uploadFileRequest* uploadFile (AbstractApiInvoker* invoker,
+Sender<responses::uploadFileRequest> uploadFile (AbstractApiInvoker* invoker,
         const qint64& petId,
         boost::optional<QString> additionalMetadata,
         QIODevice* file) {
@@ -547,10 +586,19 @@ uploadFileRequest* uploadFile (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+            if(additionalMetadata)set_form_data(parts,"additionalMetadata", *additionalMetadata);
+            if(file)set_form_data(parts,"file", file);
+    
+    }
+    else {
+            if(additionalMetadata)formParams.addQueryItem("additionalMetadata", to_query_value(*additionalMetadata));
+    
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new uploadFileRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
-    request->send();
     return request;
 }
 

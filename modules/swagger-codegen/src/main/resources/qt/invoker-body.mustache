@@ -16,7 +16,7 @@ AbstractApiInvoker::AbstractApiInvoker(QObject* parent)
 }
 
 
-QString AbstractApiInvoker::getBasePath() {
+QString AbstractApiInvoker::getBasePath() const {
     return QStringLiteral("{{basePath}}");
 }
 

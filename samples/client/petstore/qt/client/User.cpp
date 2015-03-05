@@ -6,14 +6,18 @@ namespace swagger {
 
 
 
-User::User(qint64 id,
-        const QString& username,
-        const QString& firstName,
-        const QString& lastName,
-        const QString& email,
-        const QString& password,
-        const QString& phone,
-        qint32 userStatus) {
+
+
+
+
+User::User(const qint64 & id,
+        const QString & username,
+        const QString & firstName,
+        const QString & lastName,
+        const QString & email,
+        const QString & password,
+        const QString & phone,
+        const qint32 & userStatus) {
 
     setId(id);
     setUsername(username);
@@ -26,67 +30,67 @@ User::User(qint64 id,
 }
 
 
-qint64 User::id() const {
+auto User::id() const -> qint64 {
     return m_id;
 }
 
-void  User::setId(qint64 id) {
+void  User::setId(const qint64 & id) {
     m_id = id;
 }
 
-QString User::username() const {
+auto User::username() const -> QString {
     return m_username;
 }
 
-void  User::setUsername(const QString& username) {
+void  User::setUsername(const QString & username) {
     m_username = username;
 }
 
-QString User::firstName() const {
+auto User::firstName() const -> QString {
     return m_firstName;
 }
 
-void  User::setFirstName(const QString& firstName) {
+void  User::setFirstName(const QString & firstName) {
     m_firstName = firstName;
 }
 
-QString User::lastName() const {
+auto User::lastName() const -> QString {
     return m_lastName;
 }
 
-void  User::setLastName(const QString& lastName) {
+void  User::setLastName(const QString & lastName) {
     m_lastName = lastName;
 }
 
-QString User::email() const {
+auto User::email() const -> QString {
     return m_email;
 }
 
-void  User::setEmail(const QString& email) {
+void  User::setEmail(const QString & email) {
     m_email = email;
 }
 
-QString User::password() const {
+auto User::password() const -> QString {
     return m_password;
 }
 
-void  User::setPassword(const QString& password) {
+void  User::setPassword(const QString & password) {
     m_password = password;
 }
 
-QString User::phone() const {
+auto User::phone() const -> QString {
     return m_phone;
 }
 
-void  User::setPhone(const QString& phone) {
+void  User::setPhone(const QString & phone) {
     m_phone = phone;
 }
 
-qint32 User::userStatus() const {
+auto User::userStatus() const -> qint32 {
     return m_userStatus;
 }
 
-void  User::setUserStatus(qint32 userStatus) {
+void  User::setUserStatus(const qint32 & userStatus) {
     m_userStatus = userStatus;
 }
 
@@ -96,27 +100,19 @@ QJsonObject User::serialize() const {
     QJsonObject json;
 
     
-    
     json.insert("id", swagger::serialize(m_id));
-    
     
     json.insert("username", swagger::serialize(m_username));
     
-    
     json.insert("firstName", swagger::serialize(m_firstName));
-    
     
     json.insert("lastName", swagger::serialize(m_lastName));
     
-    
     json.insert("email", swagger::serialize(m_email));
-    
     
     json.insert("password", swagger::serialize(m_password));
     
-    
     json.insert("phone", swagger::serialize(m_phone));
-    
     
     json.insert("userStatus", swagger::serialize(m_userStatus));
     

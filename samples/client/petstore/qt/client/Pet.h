@@ -27,36 +27,36 @@ public:
     Q_ENUMS(Status);
 
     Pet();
-    Pet(const QString& name,
-        const QStringList& photoUrls,
-        qint64 id = {},
-        const Category& category = {},
-        const QVector<Tag>& tags = {},
-        Status status = {});
+    Pet(const QString & name,
+        const QStringList & photoUrls,
+        const qint64 & id = {},
+        const Category & category = {},
+        const QVector<Tag> & tags = {},
+        const Status & status = {});
 
     
     QString name() const;
-    void setName(const QString& name);
+    void setName(const QString & name);
 
 
     QStringList photoUrls() const;
-    void setPhotoUrls(const QStringList& photoUrls);
+    void setPhotoUrls(const QStringList & photoUrls);
 
 
     qint64 id() const;
-    void setId(qint64 id);
+    void setId(const qint64 & id);
 
 
     Category category() const;
-    void setCategory(const Category& category);
+    void setCategory(const Category & category);
 
 
     QVector<Tag> tags() const;
-    void setTags(const QVector<Tag>& tags);
+    void setTags(const QVector<Tag> & tags);
 
 
     Status status() const;
-    void setStatus(Status status);
+    void setStatus(const Status & status);
 
 
     QJsonObject serialize() const;
@@ -71,10 +71,13 @@ private:
     Status m_status;
 };
 
-template <>
-struct is_model<Pet> : std::true_type {};
+
+SWAGGER_DECLARE_MODEL(Pet);
+
+SWAGGER_DECLARE_ENUM(Pet, Status);
 
 }
+
 Q_DECLARE_METATYPE(swagger::Pet);
 
 #endif

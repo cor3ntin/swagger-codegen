@@ -4,6 +4,12 @@
 
 namespace swagger {
 
+
+SWAGGER_REGISTER_ENUM(Pet, Status);
+
+
+
+
 Pet::Pet()
     : m_name{}
     , m_photoUrls{}
@@ -13,12 +19,12 @@ Pet::Pet()
     , m_status{}  {
 }
 
-Pet::Pet(const QString& name,
-        const QStringList& photoUrls,
-        qint64 id,
-        const Category& category,
-        const QVector<Tag>& tags,
-        Status status) {
+Pet::Pet(const QString & name,
+        const QStringList & photoUrls,
+        const qint64 & id,
+        const Category & category,
+        const QVector<Tag> & tags,
+        const Status & status) {
 
     setName(name);
     setPhotoUrls(photoUrls);
@@ -29,51 +35,51 @@ Pet::Pet(const QString& name,
 }
 
 
-QString Pet::name() const {
+auto Pet::name() const -> QString {
     return m_name;
 }
 
-void  Pet::setName(const QString& name) {
+void  Pet::setName(const QString & name) {
     m_name = name;
 }
 
-QStringList Pet::photoUrls() const {
+auto Pet::photoUrls() const -> QStringList {
     return m_photoUrls;
 }
 
-void  Pet::setPhotoUrls(const QStringList& photoUrls) {
+void  Pet::setPhotoUrls(const QStringList & photoUrls) {
     m_photoUrls = photoUrls;
 }
 
-qint64 Pet::id() const {
+auto Pet::id() const -> qint64 {
     return m_id;
 }
 
-void  Pet::setId(qint64 id) {
+void  Pet::setId(const qint64 & id) {
     m_id = id;
 }
 
-Category Pet::category() const {
+auto Pet::category() const -> Category {
     return m_category;
 }
 
-void  Pet::setCategory(const Category& category) {
+void  Pet::setCategory(const Category & category) {
     m_category = category;
 }
 
-QVector<Tag> Pet::tags() const {
+auto Pet::tags() const -> QVector<Tag> {
     return m_tags;
 }
 
-void  Pet::setTags(const QVector<Tag>& tags) {
+void  Pet::setTags(const QVector<Tag> & tags) {
     m_tags = tags;
 }
 
-Pet::Status Pet::status() const {
+auto Pet::status() const -> Status {
     return m_status;
 }
 
-void  Pet::setStatus(Status status) {
+void  Pet::setStatus(const Status & status) {
     m_status = status;
 }
 
@@ -83,23 +89,17 @@ QJsonObject Pet::serialize() const {
     QJsonObject json;
 
     
-    
     json.insert("name", swagger::serialize(m_name));
-    
     
     json.insert("photoUrls", swagger::serialize(m_photoUrls));
     
-    
     json.insert("id", swagger::serialize(m_id));
-    
     
     json.insert("category", swagger::serialize(m_category));
     
-    
     json.insert("tags", swagger::serialize(m_tags));
     
-    json.insert("status", SWAGGER_SERIALIZE_QENUM(Pet, Status, m_status));
-    
+    json.insert("status", swagger::serialize(m_status));
     
     return json;
 }
@@ -132,7 +132,7 @@ boost::optional<Pet> Pet::unserialize(const QJsonObject & json) {
         if(v) obj.setTags(*v);
     }
     if((it = json.find("status")) != std::end(json)) {
-        auto v = SWAGGER_UNSERIALIZE_QENUM(Pet, Status, *it);
+        auto v = swagger::unserialize<Status>(*it);
         if(v) obj.setStatus(*v);
     }
     return obj;

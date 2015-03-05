@@ -250,7 +250,7 @@ namespace operations {
 
 
 
-createUserRequest* createUser (AbstractApiInvoker* invoker,
+Sender<responses::createUserRequest> createUser (AbstractApiInvoker* invoker,
         boost::optional<User> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -285,16 +285,21 @@ createUserRequest* createUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUserRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-createUsersWithArrayInputRequest* createUsersWithArrayInput (AbstractApiInvoker* invoker,
+Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput (AbstractApiInvoker* invoker,
         boost::optional<QVector<User>> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -329,16 +334,21 @@ createUsersWithArrayInputRequest* createUsersWithArrayInput (AbstractApiInvoker*
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUsersWithArrayInputRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-createUsersWithListInputRequest* createUsersWithListInput (AbstractApiInvoker* invoker,
+Sender<responses::createUsersWithListInputRequest> createUsersWithListInput (AbstractApiInvoker* invoker,
         boost::optional<QVector<User>> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -373,16 +383,21 @@ createUsersWithListInputRequest* createUsersWithListInput (AbstractApiInvoker* i
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUsersWithListInputRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-loginUserRequest* loginUser (AbstractApiInvoker* invoker,
+Sender<responses::loginUserRequest> loginUser (AbstractApiInvoker* invoker,
         boost::optional<QString> username,
         boost::optional<QString> password) {
 
@@ -406,16 +421,21 @@ loginUserRequest* loginUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new loginUserRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-logoutUserRequest* logoutUser (AbstractApiInvoker* invoker) {
+Sender<responses::logoutUserRequest> logoutUser (AbstractApiInvoker* invoker) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -435,16 +455,21 @@ logoutUserRequest* logoutUser (AbstractApiInvoker* invoker) {
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new logoutUserRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-getUserByNameRequest* getUserByName (AbstractApiInvoker* invoker,
+Sender<responses::getUserByNameRequest> getUserByName (AbstractApiInvoker* invoker,
         const QString& username) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -466,16 +491,21 @@ getUserByNameRequest* getUserByName (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getUserByNameRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-updateUserRequest* updateUser (AbstractApiInvoker* invoker,
+Sender<responses::updateUserRequest> updateUser (AbstractApiInvoker* invoker,
         const QString& username,
         boost::optional<User> body) {
 
@@ -512,16 +542,21 @@ updateUserRequest* updateUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new updateUserRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-deleteUserRequest* deleteUser (AbstractApiInvoker* invoker,
+Sender<responses::deleteUserRequest> deleteUser (AbstractApiInvoker* invoker,
         const QString& username) {
 
     QByteArray http_method = QByteArrayLiteral("DELETE");
@@ -543,10 +578,15 @@ deleteUserRequest* deleteUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deleteUserRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 

@@ -154,7 +154,7 @@ namespace operations {
 
 
 
-getInventoryRequest* getInventory (AbstractApiInvoker* invoker) {
+Sender<responses::getInventoryRequest> getInventory (AbstractApiInvoker* invoker) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -174,16 +174,21 @@ getInventoryRequest* getInventory (AbstractApiInvoker* invoker) {
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getInventoryRequest(std::move(params), invoker, QStringList{ "api_key" }  );
-    request->send();
     return request;
 }
 
 
 
-placeOrderRequest* placeOrder (AbstractApiInvoker* invoker,
+Sender<responses::placeOrderRequest> placeOrder (AbstractApiInvoker* invoker,
         boost::optional<Order> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -218,16 +223,21 @@ placeOrderRequest* placeOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new placeOrderRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-getOrderByIdRequest* getOrderById (AbstractApiInvoker* invoker,
+Sender<responses::getOrderByIdRequest> getOrderById (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -249,16 +259,21 @@ getOrderByIdRequest* getOrderById (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getOrderByIdRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 
 
 
-deleteOrderRequest* deleteOrder (AbstractApiInvoker* invoker,
+Sender<responses::deleteOrderRequest> deleteOrder (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
     QByteArray http_method = QByteArrayLiteral("DELETE");
@@ -280,10 +295,15 @@ deleteOrderRequest* deleteOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
+    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
+    
+    }
+    else {
+    
+    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deleteOrderRequest(std::move(params), invoker, QStringList{  }  );
-    request->send();
     return request;
 }
 

@@ -60,7 +60,7 @@ namespace operations {
 
 
 
-{{nickname}}Request* {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
+Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
         {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
         {{/hasMore}}{{/allParams}}) {
 
@@ -117,7 +117,6 @@ namespace operations {
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
     auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
-    request->send();
     return request;
 }
 {{/operation}}

@@ -17,46 +17,46 @@ public:
     
 
     
-    User(qint64 id = {},
-        const QString& username = {},
-        const QString& firstName = {},
-        const QString& lastName = {},
-        const QString& email = {},
-        const QString& password = {},
-        const QString& phone = {},
-        qint32 userStatus = {});
+    User(const qint64 & id = {},
+        const QString & username = {},
+        const QString & firstName = {},
+        const QString & lastName = {},
+        const QString & email = {},
+        const QString & password = {},
+        const QString & phone = {},
+        const qint32 & userStatus = {});
 
     
     qint64 id() const;
-    void setId(qint64 id);
+    void setId(const qint64 & id);
 
 
     QString username() const;
-    void setUsername(const QString& username);
+    void setUsername(const QString & username);
 
 
     QString firstName() const;
-    void setFirstName(const QString& firstName);
+    void setFirstName(const QString & firstName);
 
 
     QString lastName() const;
-    void setLastName(const QString& lastName);
+    void setLastName(const QString & lastName);
 
 
     QString email() const;
-    void setEmail(const QString& email);
+    void setEmail(const QString & email);
 
 
     QString password() const;
-    void setPassword(const QString& password);
+    void setPassword(const QString & password);
 
 
     QString phone() const;
-    void setPhone(const QString& phone);
+    void setPhone(const QString & phone);
 
 
     qint32 userStatus() const;
-    void setUserStatus(qint32 userStatus);
+    void setUserStatus(const qint32 & userStatus);
 
 
     QJsonObject serialize() const;
@@ -73,10 +73,11 @@ private:
     qint32 m_userStatus;
 };
 
-template <>
-struct is_model<User> : std::true_type {};
+
+SWAGGER_DECLARE_MODEL(User);
 
 }
+
 Q_DECLARE_METATYPE(swagger::User);
 
 #endif

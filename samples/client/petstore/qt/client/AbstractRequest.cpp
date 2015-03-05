@@ -1,10 +1,13 @@
-#include "AbstractResponse.h"
-#include "ApiInvoker.h"
+#include "AbstractRequest.h"
+
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonObject>
+
+#include "ApiInvoker.h"
+#include "SwaggerUtils.h"
 
 namespace swagger {
 
@@ -18,6 +21,14 @@ AbstractRequest::AbstractRequest(AbstractApiInvoker::RequestParams && params, Ab
 
         connect(m_invoker, &QObject::destroyed, this, &QObject::deleteLater);
 
+}
+
+void AbstractRequest::setRawHeader(const QByteArray & k, const QByteArray & v) {
+    if(m_reply) {
+        logSwaggerWarning() << "calling setRawHeader after send()";
+        return;
+    }
+    std::get<0>(m_params).setRawHeader(k,v);
 }
 
 void AbstractRequest::send() {
@@ -99,7 +110,7 @@ void AbstractRequest::onReplyFinished() {
         QJsonParseError error;
         doc = QJsonDocument::fromJson(result, &error);
         if(error.error != QJsonParseError::NoError) {
-            qWarning() << error.errorString();
+            logSwaggerWarning() << error.errorString();
             m_error = InvalidResponse;
         }
 

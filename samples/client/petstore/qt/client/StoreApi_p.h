@@ -25,15 +25,15 @@ namespace responses {
 
 namespace operations {
 //Requires authentification with scheme api_key (apiKey)
-responses::getInventoryRequest* getInventory(AbstractApiInvoker* invoker);
+Sender<responses::getInventoryRequest> getInventory(AbstractApiInvoker* invoker);
 
-responses::placeOrderRequest* placeOrder(AbstractApiInvoker* invoker,
+Sender<responses::placeOrderRequest> placeOrder(AbstractApiInvoker* invoker,
                 boost::optional<Order> body = {} );
 
-responses::getOrderByIdRequest* getOrderById(AbstractApiInvoker* invoker,
+Sender<responses::getOrderByIdRequest> getOrderById(AbstractApiInvoker* invoker,
                 const QString& orderId);
 
-responses::deleteOrderRequest* deleteOrder(AbstractApiInvoker* invoker,
+Sender<responses::deleteOrderRequest> deleteOrder(AbstractApiInvoker* invoker,
                 const QString& orderId);
 
 }
@@ -261,6 +261,10 @@ class getInventoryRequest : public AbstractRequest {
     Q_OBJECT
 public:
     getInventoryRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    getInventoryRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished200(QHash<QString, qint32>);
@@ -287,6 +291,10 @@ class placeOrderRequest : public AbstractRequest {
     Q_OBJECT
 public:
     placeOrderRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    placeOrderRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished200(Order);
@@ -315,6 +323,10 @@ class getOrderByIdRequest : public AbstractRequest {
     Q_OBJECT
 public:
     getOrderByIdRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    getOrderByIdRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();
@@ -345,6 +357,10 @@ class deleteOrderRequest : public AbstractRequest {
     Q_OBJECT
 public:
     deleteOrderRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    deleteOrderRequest* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
     void finished404();

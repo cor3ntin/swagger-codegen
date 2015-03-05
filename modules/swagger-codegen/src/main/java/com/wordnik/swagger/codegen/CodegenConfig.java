@@ -25,6 +25,8 @@ public interface CodegenConfig {
   String escapeReservedWord(String name);
   String getTypeDeclaration(Property p);
   String getTypeDeclaration(String name);
+  String getEnumDeclaration(String enumName, Property container);
+
   void processOpts();
 
   Set<String> reservedWords();

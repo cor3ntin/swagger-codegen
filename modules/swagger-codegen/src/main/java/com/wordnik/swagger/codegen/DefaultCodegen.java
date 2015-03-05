@@ -332,6 +332,16 @@ public class DefaultCodegen {
     return swaggerType;
   }
 
+  public String getEnumDeclaration(String enumName, Property container) {
+    if(container == null || container instanceof StringProperty)
+      return StringUtils.capitalize(enumName) + "Enum";
+
+    if(container instanceof StringProperty || container instanceof MapProperty)
+      return getTypeDeclaration(container);
+
+    throw new RuntimeException("Enum in type" + getTypeDeclaration(container) + " not allowed");
+  }
+
   public String toApiName(String name) {
     if(name.length() == 0)
       return "DefaultApi";
@@ -513,12 +523,6 @@ public class DefaultCodegen {
 
     property.datatype = getTypeDeclaration(p);
 
-    // this can cause issues for clients which don't support enums
-    if(property.isEnum)
-      property.datatypeWithEnum = StringUtils.capitalize(property.name) + "Enum";
-    else
-      property.datatypeWithEnum = property.datatype;
-
     property.baseType = getSwaggerType(p);
 
     if(p instanceof ArrayProperty) {
@@ -531,10 +535,17 @@ public class DefaultCodegen {
       }
       else {
         property.baseType = getSwaggerType(p);
-        if(!languageSpecificPrimitives.contains(cp.baseType))
+        property.isEnum = cp.isEnum;
+        if(cp.isEnum) {
+          property.allowableValues  = cp.allowableValues;
+        }
+
+        if(!languageSpecificPrimitives.contains(cp.baseType)) {
           property.complexType = cp.baseType;
-        else
+        }
+        else {
           property.isPrimitiveType = true;
+        }
       }
     }
     else if(p instanceof MapProperty) {
@@ -544,6 +555,12 @@ public class DefaultCodegen {
       CodegenProperty cp = fromProperty("inner", ap.getAdditionalProperties());
 
       property.baseType = getSwaggerType(p);
+
+      property.isEnum = cp.isEnum;
+      if(cp.isEnum) {
+        property.allowableValues  = cp.allowableValues;
+      }
+
       if(!languageSpecificPrimitives.contains(cp.baseType))
         property.complexType = cp.baseType;
       else
@@ -556,6 +573,16 @@ public class DefaultCodegen {
       else
         property.complexType = property.baseType;
     }
+
+    // this can cause issues for clients which don't support enums
+    if(property.isEnum) {
+      property.datatypeWithEnum = getEnumDeclaration(property.name, p);
+      property.innerDatatypeWithEnum = getEnumDeclaration(property.name, null);
+    }
+    else
+      property.innerDatatypeWithEnum = property.datatypeWithEnum = property.datatype;
+
+
     return property;
   }
 

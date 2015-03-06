@@ -10,6 +10,8 @@ public class CodegenOperation {
   public String path, operationId, returnType, httpMethod, returnBaseType,
     returnContainer, summary, notes, baseName, defaultResponse;
 
+  public Boolean hasPathParams, hasFormParams, hasBodyParams, hasQueryParams, hasHeaderParams;
+
   public List<Map<String, String>> consumes, produces;
   public CodegenParameter bodyParam;
   public List<CodegenParameter> allParams = new ArrayList<CodegenParameter>();

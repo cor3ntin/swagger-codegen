@@ -760,11 +760,21 @@ public class DefaultCodegen {
     op.httpMethod = httpMethod.toUpperCase();
     op.allParams = addHasMore(allParams);
     op.bodyParams = addHasMore(bodyParams);
+    if(!op.bodyParams.isEmpty())
+      op.hasBodyParams = true;
     op.pathParams = addHasMore(pathParams);
+    if(!op.pathParams.isEmpty())
+      op.hasPathParams = true;
     op.queryParams = addHasMore(queryParams);
+    if(!op.queryParams.isEmpty())
+      op.hasQueryParams = true;
     op.headerParams = addHasMore(headerParams);
+    if(!op.headerParams.isEmpty())
+      op.hasHeaderParams = true;
     // op.cookieParams = cookieParams;
     op.formParams = addHasMore(formParams);
+    if(!op.formParams.isEmpty())
+      op.hasFormParams = true;
     // legacy support
     op.nickname = operationId;
 

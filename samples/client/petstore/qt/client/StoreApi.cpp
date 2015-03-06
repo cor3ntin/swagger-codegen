@@ -174,12 +174,6 @@ Sender<responses::getInventoryRequest> getInventory (AbstractApiInvoker* invoker
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getInventoryRequest(std::move(params), invoker, QStringList{ "api_key" }  );
@@ -223,12 +217,6 @@ Sender<responses::placeOrderRequest> placeOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new placeOrderRequest(std::move(params), invoker, QStringList{  }  );
@@ -259,12 +247,6 @@ Sender<responses::getOrderByIdRequest> getOrderById (AbstractApiInvoker* invoker
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getOrderByIdRequest(std::move(params), invoker, QStringList{  }  );
@@ -295,12 +277,6 @@ Sender<responses::deleteOrderRequest> deleteOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deleteOrderRequest(std::move(params), invoker, QStringList{  }  );

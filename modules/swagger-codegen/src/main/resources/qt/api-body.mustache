@@ -81,13 +81,11 @@ Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker
     {{#consumes.size}}QStringList contentTypes = {
         {{#consumes}}"{{mediaType}}"{{#hasMore}},{{/hasMore}}{{/consumes}}
     };
-    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
-{{/consumes.size}}{{^consumes}}QString contentType(QLatin1String("application/json"));{{/consumes}}
-
-    {{#bodyParam}}{{#isFile}}if({{paramName}} &&contentTypes.isEmpty())
-        contentType = QMimeDatabase::mimeTypeForData({{paramName}});{{/isFile}}{{/bodyParam}}
-
-    {{#bodyParam}}{{^required}}if({{paramName}}) { {{/required}}
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");{{/consumes.size}}{{^consumes}}QString contentType(QLatin1String("application/json"));{{/consumes}}
+{{#bodyParam}}{{#isFile}}
+    if({{paramName}} &&contentTypes.isEmpty())
+        contentType = QMimeDatabase::mimeTypeForData({{paramName}});{{/isFile}}{{/bodyParam}}{{#bodyParam}}{{^required}}
+    if({{paramName}}) { {{/required}}
         auto bodyVar = {{^required}}*{{/required}} {{paramName}};
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
             {{#isPrimitiveType}}
@@ -102,10 +100,9 @@ Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker
             else if(jsonValue.isObject())
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
-    }
-    {{/bodyParam}}
+    }{{/bodyParam}}
 
-    QHttpMultiPart* parts = nullptr;
+    QHttpMultiPart* parts = nullptr;{{#hasFormParams}}
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
     {{#formParams}}        {{^required}}if({{paramName}}){{/required}}set_form_data(parts,"{{paramName}}", {{#notFile}}{{^required}}*{{/required}}{{/notFile}}{{paramName}});
     {{/formParams}}
@@ -113,7 +110,7 @@ Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker
     else {
     {{#formParams}}{{#notFile}}        {{^required}}if({{paramName}}){{/required}}formParams.addQueryItem("{{paramName}}", to_query_value({{^required}}*{{/required}}{{paramName}}));{{/notFile}}
     {{/formParams}}
-    }
+    }{{/hasFormParams}}
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
     auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );

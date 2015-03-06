@@ -99,7 +99,7 @@ void AbstractRequest::setAutoDetete(bool b) {
 void AbstractRequest::onReplyFinished() {
     QJsonDocument doc;
     if( m_reply->error() != 0 && (m_reply->error() < 200
-        || m_reply->error() == QNetworkReply::ContentReSendError || m_reply->error() >= 300))
+        || m_reply->error() == QNetworkReply::ContentReSendError))
 
         m_error = NetworkError;
 

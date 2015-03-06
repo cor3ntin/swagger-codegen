@@ -285,12 +285,6 @@ Sender<responses::createUserRequest> createUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUserRequest(std::move(params), invoker, QStringList{  }  );
@@ -334,12 +328,6 @@ Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput (A
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUsersWithArrayInputRequest(std::move(params), invoker, QStringList{  }  );
@@ -383,12 +371,6 @@ Sender<responses::createUsersWithListInputRequest> createUsersWithListInput (Abs
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new createUsersWithListInputRequest(std::move(params), invoker, QStringList{  }  );
@@ -421,12 +403,6 @@ Sender<responses::loginUserRequest> loginUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new loginUserRequest(std::move(params), invoker, QStringList{  }  );
@@ -455,12 +431,6 @@ Sender<responses::logoutUserRequest> logoutUser (AbstractApiInvoker* invoker) {
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new logoutUserRequest(std::move(params), invoker, QStringList{  }  );
@@ -491,12 +461,6 @@ Sender<responses::getUserByNameRequest> getUserByName (AbstractApiInvoker* invok
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getUserByNameRequest(std::move(params), invoker, QStringList{  }  );
@@ -542,12 +506,6 @@ Sender<responses::updateUserRequest> updateUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new updateUserRequest(std::move(params), invoker, QStringList{  }  );
@@ -578,12 +536,6 @@ Sender<responses::deleteUserRequest> deleteUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deleteUserRequest(std::move(params), invoker, QStringList{  }  );

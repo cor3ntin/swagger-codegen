@@ -464,7 +464,7 @@ struct is_enum<o::e> : std::true_type {\
     using class_name = o;\
 }
 
-#define SWAGGER_REGISTER_ENUM(o,e) const char* const swagger::is_enum<o::e>::name = "#e";                                                                                               \
+#define SWAGGER_REGISTER_ENUM(o,e) const char* const swagger::is_enum<o::e>::name = #e;                                                                                               \
 
 
 

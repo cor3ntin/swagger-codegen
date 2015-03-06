@@ -299,12 +299,6 @@ Sender<responses::updatePetRequest> updatePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new updatePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
@@ -352,12 +346,6 @@ Sender<responses::addPetRequest> addPet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new addPetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
@@ -388,12 +376,6 @@ Sender<responses::findPetsByStatusRequest> findPetsByStatus (AbstractApiInvoker*
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new findPetsByStatusRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
@@ -424,12 +406,6 @@ Sender<responses::findPetsByTagsRequest> findPetsByTags (AbstractApiInvoker* inv
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new findPetsByTagsRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
@@ -460,12 +436,6 @@ Sender<responses::getPetByIdRequest> getPetById (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new getPetByIdRequest(std::move(params), invoker, QStringList{ "api_key","petstore_auth" }  );
@@ -544,12 +514,6 @@ Sender<responses::deletePetRequest> deletePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
     auto request = new deletePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );

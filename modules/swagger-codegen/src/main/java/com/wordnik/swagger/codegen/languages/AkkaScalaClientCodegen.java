@@ -10,27 +10,26 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import javax.annotation.Nullable;
+import java.io.*;
 import java.util.*;
 
 public class AkkaScalaClientCodegen extends DefaultCodegen implements CodegenConfig {
   Logger LOGGER = LoggerFactory.getLogger(AkkaScalaClientCodegen.class);
 
-  protected String mainPackage = "io.swagger.client";
+  protected Properties configProperties = getProperties();
+  protected String mainPackage = configProperties.getProperty("package", "io.swagger.client");
 
   protected String invokerPackage = mainPackage + ".core";
-  protected String groupId = "com.wordnik";
-  protected String artifactId = "swagger-client";
-  protected String artifactVersion = "1.0.0";
+  protected String groupId = configProperties.getProperty("groupId", "com.wordnik");
+  protected String artifactId = configProperties.getProperty("artifactId", "swagger-client");
+  protected String artifactVersion = configProperties.getProperty("artifactVersion", "1.0.0");
   protected String sourceFolder = "src/main/scala";
   protected String resourcesFolder = "src/main/resources";
   protected String configKey = "apiRequest";
   protected int defaultTimeoutInMs = 5000;
   protected String configKeyPath = mainPackage;
-
+  protected boolean createInvoker = ! "false".equals(configProperties.getProperty("invoker"));
   protected boolean registerNonStandardStatusCodes = true;
   protected boolean renderJavadoc = true;
   protected boolean removeOAuthSecurities = true;
@@ -56,6 +55,7 @@ public class AkkaScalaClientCodegen extends DefaultCodegen implements CodegenCon
 
   public AkkaScalaClientCodegen() {
     super();
+
     outputFolder = "generated-code/scala";
     modelTemplateFiles.put("model.mustache", ".scala");
     apiTemplateFiles.put("api.mustache", ".scala");
@@ -87,14 +87,17 @@ public class AkkaScalaClientCodegen extends DefaultCodegen implements CodegenCon
     additionalProperties.put("onlyOneSuccess", onlyOneSuccess);
 
     supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
-    supportingFiles.add(new SupportingFile("reference.mustache", resourcesFolder, "reference.conf"));
-    final String invokerFolder = (sourceFolder + File.separator + invokerPackage).replace(".", File.separator);
-    supportingFiles.add(new SupportingFile("apiRequest.mustache", invokerFolder, "ApiRequest.scala"));
-    supportingFiles.add(new SupportingFile("apiInvoker.mustache", invokerFolder, "ApiInvoker.scala"));
-    supportingFiles.add(new SupportingFile("requests.mustache", invokerFolder, "requests.scala"));
-    supportingFiles.add(new SupportingFile("apiSettings.mustache", invokerFolder, "ApiSettings.scala"));
     final String apiFolder = (sourceFolder + File.separator + apiPackage).replace(".", File.separator);
     supportingFiles.add(new SupportingFile("enumsSerializers.mustache", apiFolder, "EnumsSerializers.scala"));
+
+    if (createInvoker) {
+      supportingFiles.add(new SupportingFile("reference.mustache", resourcesFolder, "reference.conf"));
+      final String invokerFolder = (sourceFolder + File.separator + invokerPackage).replace(".", File.separator);
+      supportingFiles.add(new SupportingFile("apiRequest.mustache", invokerFolder, "ApiRequest.scala"));
+      supportingFiles.add(new SupportingFile("apiInvoker.mustache", invokerFolder, "ApiInvoker.scala"));
+      supportingFiles.add(new SupportingFile("requests.mustache", invokerFolder, "requests.scala"));
+      supportingFiles.add(new SupportingFile("apiSettings.mustache", invokerFolder, "ApiSettings.scala"));
+    }
 
     importMapping.remove("Seq");
     importMapping.remove("List");
@@ -137,6 +140,31 @@ public class AkkaScalaClientCodegen extends DefaultCodegen implements CodegenCon
     );
     instantiationTypes.put("array", "ListBuffer");
     instantiationTypes.put("map", "Map");
+  }
+
+  public Properties getProperties() {
+    Properties props = getProperties("akkaScala.properties");
+    if (props == null) props = getProperties("swagger.properties");
+    if (props == null) props = getProperties("akka-scala.properties");
+    if (props == null) props = new Properties();
+    return props;
+  }
+
+  @Nullable
+  public Properties getProperties(String fileName) {
+    final File file = new File(fileName);
+
+    System.out.print("Trying to read properties from " + file.getAbsolutePath());
+    try {
+      InputStream steam = new FileInputStream(file);
+      final Properties props = new Properties();
+      props.load(steam);
+      System.out.println(" OK");
+      return props;
+    } catch (Exception e) {
+      System.out.println(" -");
+      return null;
+    }
   }
 
   @Override

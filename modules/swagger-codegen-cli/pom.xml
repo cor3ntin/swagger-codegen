@@ -14,6 +14,7 @@
     <name>swagger-codegen (executable)</name>
 
     <build>
+        <directory>../../generator</directory>
         <finalName>swagger-codegen-cli</finalName>
         <resources>
           <resource>

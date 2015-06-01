@@ -20,7 +20,7 @@ public class AkkaScalaClientCodegen extends DefaultCodegen implements CodegenCon
   protected Properties configProperties = getProperties();
   protected String mainPackage = configProperties.getProperty("package", "io.swagger.client");
 
-  protected String invokerPackage = mainPackage + ".core";
+  protected String invokerPackage = configProperties.getProperty("invokerPackage", mainPackage + ".core");
   protected String groupId = configProperties.getProperty("groupId", "com.wordnik");
   protected String artifactId = configProperties.getProperty("artifactId", "swagger-client");
   protected String artifactVersion = configProperties.getProperty("artifactVersion", "1.0.0");

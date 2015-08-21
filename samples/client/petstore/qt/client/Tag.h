@@ -1,7 +1,7 @@
 #ifndef AK_SWAGGER_Tag_H_
 #define AK_SWAGGER_Tag_H_
 
-#include <boost/optional/optional.hpp>
+#include "SwaggerUtils.h"
 #include <QStringList> //fixme
 
 class QJsonObject;
@@ -11,24 +11,26 @@ class QJsonObject;
 
 namespace swagger {
 
-template <typename T>
-using Optional = boost::optional<T>;
-
 class Tag {
+    
 public:
     
-    Tag(qint64 id = {},
-        const QString& name = {});
 
-    qint64 getId() const;
-    void setId( qint64  id);
+    
+    Tag(const qint64 & id = {},
+        const QString & name = {});
 
-    QString getName() const;
+    
+    qint64 id() const;
+    void setId(const qint64 & id);
+
+
+    QString name() const;
     void setName(const QString & name);
 
 
     QJsonObject serialize() const;
-    static Optional<Tag> unserialize(const QJsonObject & json);
+    static boost::optional<Tag> unserialize(const QJsonObject & json);
 
 private:
     qint64 m_id;
@@ -36,6 +38,10 @@ private:
 };
 
 
+SWAGGER_DECLARE_MODEL(Tag);
+
 }
+
+Q_DECLARE_METATYPE(swagger::Tag);
 
 #endif

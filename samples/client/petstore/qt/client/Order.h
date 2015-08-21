@@ -1,7 +1,7 @@
 #ifndef AK_SWAGGER_Order_H_
 #define AK_SWAGGER_Order_H_
 
-#include <boost/optional/optional.hpp>
+#include "SwaggerUtils.h"
 #include <QStringList> //fixme
 
 class QJsonObject;
@@ -12,51 +12,70 @@ class QJsonObject;
 
 namespace swagger {
 
-template <typename T>
-using Optional = boost::optional<T>;
-
 class Order {
+    Q_GADGET
 public:
     
-    Order(qint64 id = {},
-        qint64 petId = {},
-        qint32 quantity = {},
-        const QDateTime& shipDate = {},
-        const QString& status = {},
-        bool complete = {});
+    enum class Status {
+         placed,
+         approved,
+         delivered,
+        
+    };
+    Q_ENUMS(Status);
 
-    qint64 getId() const;
-    void setId( qint64  id);
+    
+    Order(const qint64 & id = {},
+        const qint64 & petId = {},
+        const qint32 & quantity = {},
+        const QDateTime & shipDate = {},
+        const Status & status = {},
+        const bool & complete = {});
 
-    qint64 getPetId() const;
-    void setPetId( qint64  petId);
+    
+    qint64 id() const;
+    void setId(const qint64 & id);
 
-    qint32 getQuantity() const;
-    void setQuantity( qint32  quantity);
 
-    QDateTime getShipDate() const;
+    qint64 petId() const;
+    void setPetId(const qint64 & petId);
+
+
+    qint32 quantity() const;
+    void setQuantity(const qint32 & quantity);
+
+
+    QDateTime shipDate() const;
     void setShipDate(const QDateTime & shipDate);
 
-    QString getStatus() const;
-    void setStatus(const QString & status);
 
-    bool getComplete() const;
-    void setComplete( bool  complete);
+    Status status() const;
+    void setStatus(const Status & status);
+
+
+    bool complete() const;
+    void setComplete(const bool & complete);
 
 
     QJsonObject serialize() const;
-    static Optional<Order> unserialize(const QJsonObject & json);
+    static boost::optional<Order> unserialize(const QJsonObject & json);
 
 private:
     qint64 m_id;
     qint64 m_petId;
     qint32 m_quantity;
     QDateTime m_shipDate;
-    QString m_status;
+    Status m_status;
     bool m_complete;
 };
 
 
+SWAGGER_DECLARE_MODEL(Order);
+
+SWAGGER_DECLARE_ENUM(Order, Status);
+
 }
+
+Q_DECLARE_METATYPE(swagger::Order);
 
 #endif

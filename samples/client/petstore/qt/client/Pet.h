@@ -1,7 +1,7 @@
 #ifndef AK_SWAGGER_Pet_H_
 #define AK_SWAGGER_Pet_H_
 
-#include <boost/optional/optional.hpp>
+#include "SwaggerUtils.h"
 #include <QStringList> //fixme
 
 class QJsonObject;
@@ -14,40 +14,53 @@ class QJsonObject;
 
 namespace swagger {
 
-template <typename T>
-using Optional = boost::optional<T>;
-
 class Pet {
+    Q_GADGET
 public:
-    Pet();
-    Pet(const QString& name,
-        const QStringList& photoUrls,
-        qint64 id = {},
-        const Category& category = {},
-        const QVector<Tag>& tags = {},
-        const QString& status = {});
+    
+    enum class Status {
+         available,
+         pending,
+         sold,
+        
+    };
+    Q_ENUMS(Status);
 
-    QString getName() const;
+    Pet();
+    Pet(const QString & name,
+        const QStringList & photoUrls,
+        const qint64 & id = {},
+        const Category & category = {},
+        const QVector<Tag> & tags = {},
+        const Status & status = {});
+
+    
+    QString name() const;
     void setName(const QString & name);
 
-    QStringList getPhotoUrls() const;
+
+    QStringList photoUrls() const;
     void setPhotoUrls(const QStringList & photoUrls);
 
-    qint64 getId() const;
-    void setId( qint64  id);
 
-    Category getCategory() const;
+    qint64 id() const;
+    void setId(const qint64 & id);
+
+
+    Category category() const;
     void setCategory(const Category & category);
 
-    QVector<Tag> getTags() const;
+
+    QVector<Tag> tags() const;
     void setTags(const QVector<Tag> & tags);
 
-    QString getStatus() const;
-    void setStatus(const QString & status);
+
+    Status status() const;
+    void setStatus(const Status & status);
 
 
     QJsonObject serialize() const;
-    static Optional<Pet> unserialize(const QJsonObject & json);
+    static boost::optional<Pet> unserialize(const QJsonObject & json);
 
 private:
     QString m_name;
@@ -55,10 +68,16 @@ private:
     qint64 m_id;
     Category m_category;
     QVector<Tag> m_tags;
-    QString m_status;
+    Status m_status;
 };
 
 
+SWAGGER_DECLARE_MODEL(Pet);
+
+SWAGGER_DECLARE_ENUM(Pet, Status);
+
 }
+
+Q_DECLARE_METATYPE(swagger::Pet);
 
 #endif

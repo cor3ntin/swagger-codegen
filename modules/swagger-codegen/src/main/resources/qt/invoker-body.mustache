@@ -5,7 +5,7 @@
 #include <QNetworkReply>
 #include <QSslError>
 
-#include "AbstractResponse.h"
+#include "AbstractRequest.h"
 #include "SwaggerUtils.h"
 
 namespace swagger {
@@ -16,7 +16,7 @@ AbstractApiInvoker::AbstractApiInvoker(QObject* parent)
 }
 
 
-QString AbstractApiInvoker::getBasePath() {
+QString AbstractApiInvoker::getBasePath() const {
     return QStringLiteral("{{basePath}}");
 }
 
@@ -73,10 +73,6 @@ AbstractApiInvoker::InvokeResult AbstractApiInvoker::invoke(const RequestParams 
         connect(result.reply, SIGNAL(sslErrors(const QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)));
 
     return result;
-}
-
-void AbstractApiInvoker::onError(const AbstractResponse* const) {
-
 }
 
 void AbstractApiInvoker::onSslErrors( const QList<QSslError> & errors ) {

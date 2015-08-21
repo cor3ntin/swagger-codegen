@@ -51,13 +51,47 @@ inline void set_form_data<QIODevice*>(QHttpMultiPart* & parts, const QString & k
     parts->append(part);
 }
 
+template <typename T>
+struct Sender {
+private:
+    T* m_sender;
+public:
+    Sender(T* sender) : m_sender(sender) {}
+
+    //non copiable
+    Sender(const Sender<T> &) = delete;
+    Sender(Sender<T> && other) {
+        m_sender = other.m_sender;
+        other.m_sender = 0;
+    }
+
+    Sender<T> & operator=(const Sender<T> & other) = delete;
+    Sender<T> & operator=(Sender<T> && other) = delete;
+
+    ~Sender() {
+        m_sender->send();
+    }
+
+    T* operator ->() {
+        return m_sender;
+    }
+
+    operator T*()  {
+        return m_sender;
+    }
+};
+
 
 template <typename T>
 struct is_model : std::false_type {};
 
+template <typename T>
+struct is_enum : std::false_type {};
+
 template <typename Container>
 struct is_array : std::false_type { };
 template <typename... Ts> struct is_array<QVector<Ts...> > : std::true_type { };
+template <typename... Ts> struct is_array<QList<Ts...> > : std::true_type { };
 template <> struct is_array<QStringList> : std::true_type { };
 
 
@@ -110,6 +144,19 @@ unserialize(const QJsonValue & value) {
     return static_cast<T>(value.toDouble());
 }
 
+template <typename Enum>
+typename std::enable_if<swagger::is_enum<Enum>::value, boost::optional<Enum>>::type
+unserialize(const QJsonValue & json) {
+    using Class = typename is_enum<Enum>::class_name;
+    const char* name = is_enum<Enum>::name;
+    auto key = swagger::unserialize<QString>(json);
+    if(!key) return {};
+    int v = Class::staticMetaObject.enumerator(Class::staticMetaObject.indexOfEnumerator(name)).keyToValue(qPrintable(*key));
+    if (v == -1) return {};
+    return boost::optional<Enum>{static_cast<Enum>(v)};
+}
+
+
 template <typename T>
 typename std::enable_if<swagger::is_model<T>::value, boost::optional<T>>::type
 unserialize(const QJsonValue & value) {
@@ -130,7 +177,7 @@ unserialize(const QJsonValue & value) {
     auto jsonArray = value.toArray();
     T array;
     array.reserve(jsonArray.size());
-    for(auto && e : jsonArray) {
+    for(const auto & e : jsonArray) {
         auto v = swagger::unserialize<typename T::value_type>(e);
         if(!v)
             return boost::optional<T>{};
@@ -158,7 +205,6 @@ unserialize(const QJsonValue & value) {
     }
     return map;
 }
-
 
 //////////////////////////////
 
@@ -191,6 +237,16 @@ typename std::enable_if<swagger::is_model<T>::value, QJsonValue>::type
 serialize(const T& value) {
     return value.serialize();
 }
+
+template <typename Enum>
+typename std::enable_if<swagger::is_enum<Enum>::value, QJsonValue>::type
+serialize(Enum value) {
+    using Class = typename is_enum<Enum>::class_name;
+    const char* name = is_enum<Enum>::name;
+    return swagger::serialize<QString>(Class::staticMetaObject.enumerator
+     (Class::staticMetaObject.indexOfEnumerator(name)).valueToKey((static_cast<int>(value))));
+}
+
 
 template <typename T>
 typename std::enable_if<swagger::is_array<T>::value, QJsonValue>::type
@@ -399,19 +455,18 @@ on ## HttpCode (Obj obj, Func func) {                                           
     return this;                                                                             \
 }
 
+#define SWAGGER_DECLARE_MODEL(m) template <> struct is_model<m> : std::true_type {}
 
-//enum serialization
-#define SWAGGER_SERIALIZE_QENUM(o,e,v)  swagger::serialize<QString>(o::staticMetaObject.enumerator\
-    (o::staticMetaObject.indexOfEnumerator(#e)).valueToKey((static_cast<int>(v))))
+#define SWAGGER_DECLARE_ENUM(o,e)\
+template <>\
+struct is_enum<o::e> : std::true_type {\
+    static const char* const name;\
+    using class_name = o;\
+}
 
-#define SWAGGER_UNSERIALIZE_QENUM(o,e, k) [](const QJsonValue & json) -> boost::optional<o::e> {\
-    auto key = swagger::unserialize<QString>(json);\
-    if(!key) return {};\
-    int v = o::staticMetaObject.enumerator\
-    (o::staticMetaObject.indexOfEnumerator(#e)).keyToValue(qPrintable(*key));\
-    if (v == -1) return {};\
-    return boost::optional<o::e>{static_cast<o::e>(v)};\
-    }(k)
+#define SWAGGER_REGISTER_ENUM(o,e) const char* const swagger::is_enum<o::e>::name = #e;                                                                                               \
+
+
 
 
 

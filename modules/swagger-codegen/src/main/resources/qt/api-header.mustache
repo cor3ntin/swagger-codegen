@@ -29,7 +29,7 @@ namespace operations {
 {{#authMethods}}
 //Requires authentification with scheme {{name}} ({{type}})
 {{/authMethods}}
-responses::{{nickname}}Request* {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
+Sender<responses::{{nickname}}Request> {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
                 {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{^required}} = {} {{/required}}{{#hasMore}},
                 {{/hasMore}}{{/allParams}});
 
@@ -99,6 +99,10 @@ class {{nickname}}Request : public AbstractRequest {
     Q_OBJECT
 public:
     {{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    {{nickname}}Request* setRawHeader(const QByteArray & k, const QByteArray & v) {
+        AbstractRequest::setRawHeader(k, v);
+        return this;
+    }
 
 Q_SIGNALS:
 {{#responses}}

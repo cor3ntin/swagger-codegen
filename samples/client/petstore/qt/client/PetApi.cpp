@@ -1,7 +1,8 @@
-#include "PetApi.h"
-
+#include "PetApi_p.h"
+#include <array>
 #include <QUrlQuery>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
 
@@ -13,306 +14,254 @@ namespace PetApi {
 
 namespace responses {
 
-updatePetResponse::updatePetResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+updatePetRequest::updatePetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-updatePetResponse* updatePetResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error updatePetRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool updatePetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 3> knownStatus{{ 405, 404, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 405:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished405();
+            
+            return NoError;
         }
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-addPetResponse::addPetResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+addPetRequest::addPetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-addPetResponse* addPetResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error addPetRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool addPetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 405  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 405:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished405();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-findPetsByStatusResponse::findPetsByStatusResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+findPetsByStatusRequest::findPetsByStatusRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-findPetsByStatusResponse* findPetsByStatusResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error findPetsByStatusRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-findPetsByStatusResponse* findPetsByStatusResponse::on(const std::function<void(QVector<Pet>)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool findPetsByStatusResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 200:{  //QVector<Pet>
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<QVector<Pet>>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize QVector<Pet>");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-findPetsByTagsResponse::findPetsByTagsResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+findPetsByTagsRequest::findPetsByTagsRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-findPetsByTagsResponse* findPetsByTagsResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error findPetsByTagsRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-findPetsByTagsResponse* findPetsByTagsResponse::on(const std::function<void(QVector<Pet>)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool findPetsByTagsResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 200:{  //QVector<Pet>
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for QVector<Pet> - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<QVector<Pet>>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize QVector<Pet>");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-getPetByIdResponse::getPetByIdResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+getPetByIdRequest::getPetByIdRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-getPetByIdResponse* getPetByIdResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error getPetByIdRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-getPetByIdResponse* getPetByIdResponse::on(const std::function<void(Pet)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool getPetByIdResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 3> knownStatus{{ 404, 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 200:{  //Pet
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for Pet - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<Pet>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize Pet");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-updatePetWithFormResponse::updatePetWithFormResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+updatePetWithFormRequest::updatePetWithFormRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-updatePetWithFormResponse* updatePetWithFormResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error updatePetWithFormRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool updatePetWithFormResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 405  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 405:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished405();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-deletePetResponse::deletePetResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+deletePetRequest::deletePetRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-deletePetResponse* deletePetResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error deletePetRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool deletePetResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-uploadFileResponse::uploadFileResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+uploadFileRequest::uploadFileRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-uploadFileResponse* uploadFileResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error uploadFileRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool uploadFileResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 0  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 0:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished0();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
 } //namespace responses
 
 using namespace responses;
 
+namespace operations {
 
-updatePetResponse* updatePet (AbstractApiInvoker* invoker,
-        Optional<Pet> body) {
+
+
+
+Sender<responses::updatePetRequest> updatePet (AbstractApiInvoker* invoker,
+        boost::optional<Pet> body) {
 
     QByteArray http_method = QByteArrayLiteral("PUT");
     QByteArray http_body;
@@ -328,7 +277,7 @@ updatePetResponse* updatePet (AbstractApiInvoker* invoker,
     QStringList contentTypes = {
         "application/json","application/xml"
     };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
     
@@ -350,20 +299,16 @@ updatePetResponse* updatePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new updatePetResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new updatePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-addPetResponse* addPet (AbstractApiInvoker* invoker,
-        Optional<Pet> body) {
+
+
+Sender<responses::addPetRequest> addPet (AbstractApiInvoker* invoker,
+        boost::optional<Pet> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -379,7 +324,7 @@ addPetResponse* addPet (AbstractApiInvoker* invoker,
     QStringList contentTypes = {
         "application/json","application/xml"
     };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
     
@@ -401,20 +346,16 @@ addPetResponse* addPet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new addPetResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new addPetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-findPetsByStatusResponse* findPetsByStatus (AbstractApiInvoker* invoker,
-        Optional<QStringList> status) {
+
+
+Sender<responses::findPetsByStatusRequest> findPetsByStatus (AbstractApiInvoker* invoker,
+        boost::optional<QStringList> status) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -435,20 +376,16 @@ findPetsByStatusResponse* findPetsByStatus (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new findPetsByStatusResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new findPetsByStatusRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-findPetsByTagsResponse* findPetsByTags (AbstractApiInvoker* invoker,
-        Optional<QStringList> tags) {
+
+
+Sender<responses::findPetsByTagsRequest> findPetsByTags (AbstractApiInvoker* invoker,
+        boost::optional<QStringList> tags) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -469,19 +406,15 @@ findPetsByTagsResponse* findPetsByTags (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new findPetsByTagsResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new findPetsByTagsRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-getPetByIdResponse* getPetById (AbstractApiInvoker* invoker,
+
+
+Sender<responses::getPetByIdRequest> getPetById (AbstractApiInvoker* invoker,
         const qint64& petId) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -503,22 +436,18 @@ getPetByIdResponse* getPetById (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new getPetByIdResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new getPetByIdRequest(std::move(params), invoker, QStringList{ "api_key","petstore_auth" }  );
+    return request;
 }
 
-updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
+
+
+Sender<responses::updatePetWithFormRequest> updatePetWithForm (AbstractApiInvoker* invoker,
         const QString& petId,
-        Optional<QString> name,
-        Optional<QString> status) {
+        boost::optional<QString> name,
+        boost::optional<QString> status) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -535,7 +464,7 @@ updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
     QStringList contentTypes = {
         "application/x-www-form-urlencoded"
     };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
     
@@ -554,14 +483,16 @@ updatePetWithFormResponse* updatePetWithForm (AbstractApiInvoker* invoker,
     
     }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new updatePetWithFormResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new updatePetWithFormRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-deletePetResponse* deletePet (AbstractApiInvoker* invoker,
+
+
+Sender<responses::deletePetRequest> deletePet (AbstractApiInvoker* invoker,
         const qint64& petId,
-        Optional<QString> api_key) {
+        boost::optional<QString> api_key) {
 
     QByteArray http_method = QByteArrayLiteral("DELETE");
     QByteArray http_body;
@@ -583,21 +514,17 @@ deletePetResponse* deletePet (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new deletePetResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new deletePetRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
 }
 
-uploadFileResponse* uploadFile (AbstractApiInvoker* invoker,
+
+
+Sender<responses::uploadFileRequest> uploadFile (AbstractApiInvoker* invoker,
         const qint64& petId,
-        Optional<QString> additionalMetadata,
+        boost::optional<QString> additionalMetadata,
         QIODevice* file) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
@@ -615,7 +542,7 @@ uploadFileResponse* uploadFile (AbstractApiInvoker* invoker,
     QStringList contentTypes = {
         "multipart/form-data"
     };
-    QString contentType = contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
+    QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
 
     
@@ -634,8 +561,10 @@ uploadFileResponse* uploadFile (AbstractApiInvoker* invoker,
     
     }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new uploadFileResponse(reply, invoker);
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new uploadFileRequest(std::move(params), invoker, QStringList{ "petstore_auth" }  );
+    return request;
+}
 
 }
 

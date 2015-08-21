@@ -18,19 +18,19 @@ class {{classname}} {
     {{#hasEnums}}Q_GADGET{{/hasEnums}}
 public:
     {{#vars}}{{#isEnum}}
-    enum class {{{datatypeWithEnum}}} {
+    enum class {{innerDatatypeWithEnum}} {
         {{#allowableValues}}{{#values}} {{.}},
         {{/values}}{{/allowableValues}}
     };
-    Q_ENUMS({{{datatypeWithEnum}}});{{/isEnum}}{{/vars}}
+    Q_ENUMS({{innerDatatypeWithEnum}});{{/isEnum}}{{/vars}}
 
     {{#hasRequiredVars}}{{classname}}();{{/hasRequiredVars}}
-    {{classname}}({{#vars}}{{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
+    {{classname}}({{#vars}}const {{{datatypeWithEnum}}} & {{name}}{{^required}} = {}{{/required}}{{#hasMore}},
         {{/hasMore}}{{/vars}});
 
     {{#vars}}
-    {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}} {{getter}}() const;
-    void {{setter}}({{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}});
+    {{{datatypeWithEnum}}} {{getter}}() const;
+    void {{setter}}(const {{{datatypeWithEnum}}} & {{name}});
 
 {{/vars}}
 
@@ -42,10 +42,13 @@ private:
 {{/vars}}
 };
 
-template <>
-struct is_model<{{classname}}> : std::true_type {};
 
+SWAGGER_DECLARE_MODEL({{classname}});
+{{#vars}}{{#isEnum}}
+SWAGGER_DECLARE_ENUM({{classname}}, {{innerDatatypeWithEnum}});
+{{/isEnum}}{{/vars}}
 }
+
 Q_DECLARE_METATYPE(swagger::{{classname}});
 
 #endif

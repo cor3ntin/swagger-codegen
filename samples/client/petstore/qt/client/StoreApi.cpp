@@ -1,7 +1,8 @@
-#include "StoreApi.h"
-
+#include "StoreApi_p.h"
+#include <array>
 #include <QUrlQuery>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
 
@@ -13,183 +14,147 @@ namespace StoreApi {
 
 namespace responses {
 
-getInventoryResponse::getInventoryResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+getInventoryRequest::getInventoryRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-getInventoryResponse* getInventoryResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error getInventoryRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-getInventoryResponse* getInventoryResponse::on(const std::function<void(QHash<QString, qint32>)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool getInventoryResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 200  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 200:{  //QHash<QString, qint32>
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for QHash<QString, qint32> - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<QHash<QString, qint32>>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize QHash<QString, qint32>");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-placeOrderResponse::placeOrderResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+placeOrderRequest::placeOrderRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-placeOrderResponse* placeOrderResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error placeOrderRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-placeOrderResponse* placeOrderResponse::on(const std::function<void(Order)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool placeOrderResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 200:{  //Order
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for Order - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<Order>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize Order");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-getOrderByIdResponse::getOrderByIdResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+getOrderByIdRequest::getOrderByIdRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-getOrderByIdResponse* getOrderByIdResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error getOrderByIdRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-getOrderByIdResponse* getOrderByIdResponse::on(const std::function<void(Order)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool getOrderByIdResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 3> knownStatus{{ 404, 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 200:{  //Order
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for Order - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<Order>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize Order");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-deleteOrderResponse::deleteOrderResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+deleteOrderRequest::deleteOrderRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-deleteOrderResponse* deleteOrderResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error deleteOrderRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool deleteOrderResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 404, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
 } //namespace responses
 
 using namespace responses;
 
+namespace operations {
 
-getInventoryResponse* getInventory (AbstractApiInvoker* invoker) {
+
+
+
+Sender<responses::getInventoryRequest> getInventory (AbstractApiInvoker* invoker) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -209,20 +174,16 @@ getInventoryResponse* getInventory (AbstractApiInvoker* invoker) {
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new getInventoryResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new getInventoryRequest(std::move(params), invoker, QStringList{ "api_key" }  );
+    return request;
 }
 
-placeOrderResponse* placeOrder (AbstractApiInvoker* invoker,
-        Optional<Order> body) {
+
+
+Sender<responses::placeOrderRequest> placeOrder (AbstractApiInvoker* invoker,
+        boost::optional<Order> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -256,19 +217,15 @@ placeOrderResponse* placeOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new placeOrderResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new placeOrderRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-getOrderByIdResponse* getOrderById (AbstractApiInvoker* invoker,
+
+
+Sender<responses::getOrderByIdRequest> getOrderById (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -290,19 +247,15 @@ getOrderByIdResponse* getOrderById (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new getOrderByIdResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new getOrderByIdRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-deleteOrderResponse* deleteOrder (AbstractApiInvoker* invoker,
+
+
+Sender<responses::deleteOrderRequest> deleteOrder (AbstractApiInvoker* invoker,
         const QString& orderId) {
 
     QByteArray http_method = QByteArrayLiteral("DELETE");
@@ -324,15 +277,11 @@ deleteOrderResponse* deleteOrder (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new deleteOrderResponse(reply, invoker);
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new deleteOrderRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
+}
 
 }
 

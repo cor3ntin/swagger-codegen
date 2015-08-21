@@ -1,18 +1,23 @@
 #include "Order.h"
 #include <QJsonObject>
-
-#include "SwaggerUtils.h"
+#include <QMetaEnum>
 
 namespace swagger {
 
 
+SWAGGER_REGISTER_ENUM(Order, Status);
 
-Order::Order(qint64 id,
-        qint64 petId,
-        qint32 quantity,
-        const QDateTime& shipDate,
-        const QString& status,
-        bool complete) {
+
+
+
+
+
+Order::Order(const qint64 & id,
+        const qint64 & petId,
+        const qint32 & quantity,
+        const QDateTime & shipDate,
+        const Status & status,
+        const bool & complete) {
 
     setId(id);
     setPetId(petId);
@@ -23,31 +28,31 @@ Order::Order(qint64 id,
 }
 
 
-qint64 Order::getId() const {
+auto Order::id() const -> qint64 {
     return m_id;
 }
 
-void  Order::setId( qint64  id) {
+void  Order::setId(const qint64 & id) {
     m_id = id;
 }
 
-qint64 Order::getPetId() const {
+auto Order::petId() const -> qint64 {
     return m_petId;
 }
 
-void  Order::setPetId( qint64  petId) {
+void  Order::setPetId(const qint64 & petId) {
     m_petId = petId;
 }
 
-qint32 Order::getQuantity() const {
+auto Order::quantity() const -> qint32 {
     return m_quantity;
 }
 
-void  Order::setQuantity( qint32  quantity) {
+void  Order::setQuantity(const qint32 & quantity) {
     m_quantity = quantity;
 }
 
-QDateTime Order::getShipDate() const {
+auto Order::shipDate() const -> QDateTime {
     return m_shipDate;
 }
 
@@ -55,19 +60,19 @@ void  Order::setShipDate(const QDateTime & shipDate) {
     m_shipDate = shipDate;
 }
 
-QString Order::getStatus() const {
+auto Order::status() const -> Status {
     return m_status;
 }
 
-void  Order::setStatus(const QString & status) {
+void  Order::setStatus(const Status & status) {
     m_status = status;
 }
 
-bool Order::getComplete() const {
+auto Order::complete() const -> bool {
     return m_complete;
 }
 
-void  Order::setComplete( bool  complete) {
+void  Order::setComplete(const bool & complete) {
     m_complete = complete;
 }
 
@@ -76,17 +81,23 @@ void  Order::setComplete( bool  complete) {
 QJsonObject Order::serialize() const {
     QJsonObject json;
 
+    
     json.insert("id", swagger::serialize(m_id));
+    
     json.insert("petId", swagger::serialize(m_petId));
+    
     json.insert("quantity", swagger::serialize(m_quantity));
+    
     json.insert("shipDate", swagger::serialize(m_shipDate));
+    
     json.insert("status", swagger::serialize(m_status));
+    
     json.insert("complete", swagger::serialize(m_complete));
     
     return json;
 }
 
-Optional<Order> Order::unserialize(const QJsonObject & json) {
+boost::optional<Order> Order::unserialize(const QJsonObject & json) {
     auto it = json.end();
     Order obj;
     if((it = json.find("id")) != std::end(json)) {
@@ -106,7 +117,7 @@ Optional<Order> Order::unserialize(const QJsonObject & json) {
         if(v) obj.setShipDate(*v);
     }
     if((it = json.find("status")) != std::end(json)) {
-        auto v = swagger::unserialize<QString>(*it);
+        auto v = swagger::unserialize<Status>(*it);
         if(v) obj.setStatus(*v);
     }
     if((it = json.find("complete")) != std::end(json)) {

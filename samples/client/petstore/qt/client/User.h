@@ -1,7 +1,7 @@
 #ifndef AK_SWAGGER_User_H_
 #define AK_SWAGGER_User_H_
 
-#include <boost/optional/optional.hpp>
+#include "SwaggerUtils.h"
 #include <QStringList> //fixme
 
 class QJsonObject;
@@ -11,48 +11,56 @@ class QJsonObject;
 
 namespace swagger {
 
-template <typename T>
-using Optional = boost::optional<T>;
-
 class User {
+    
 public:
     
-    User(qint64 id = {},
-        const QString& username = {},
-        const QString& firstName = {},
-        const QString& lastName = {},
-        const QString& email = {},
-        const QString& password = {},
-        const QString& phone = {},
-        qint32 userStatus = {});
 
-    qint64 getId() const;
-    void setId( qint64  id);
+    
+    User(const qint64 & id = {},
+        const QString & username = {},
+        const QString & firstName = {},
+        const QString & lastName = {},
+        const QString & email = {},
+        const QString & password = {},
+        const QString & phone = {},
+        const qint32 & userStatus = {});
 
-    QString getUsername() const;
+    
+    qint64 id() const;
+    void setId(const qint64 & id);
+
+
+    QString username() const;
     void setUsername(const QString & username);
 
-    QString getFirstName() const;
+
+    QString firstName() const;
     void setFirstName(const QString & firstName);
 
-    QString getLastName() const;
+
+    QString lastName() const;
     void setLastName(const QString & lastName);
 
-    QString getEmail() const;
+
+    QString email() const;
     void setEmail(const QString & email);
 
-    QString getPassword() const;
+
+    QString password() const;
     void setPassword(const QString & password);
 
-    QString getPhone() const;
+
+    QString phone() const;
     void setPhone(const QString & phone);
 
-    qint32 getUserStatus() const;
-    void setUserStatus( qint32  userStatus);
+
+    qint32 userStatus() const;
+    void setUserStatus(const qint32 & userStatus);
 
 
     QJsonObject serialize() const;
-    static Optional<User> unserialize(const QJsonObject & json);
+    static boost::optional<User> unserialize(const QJsonObject & json);
 
 private:
     qint64 m_id;
@@ -66,6 +74,10 @@ private:
 };
 
 
+SWAGGER_DECLARE_MODEL(User);
+
 }
+
+Q_DECLARE_METATYPE(swagger::User);
 
 #endif

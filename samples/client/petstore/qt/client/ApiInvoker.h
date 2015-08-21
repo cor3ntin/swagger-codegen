@@ -1,43 +1,71 @@
 #ifndef _SWAGGER_API_INVOKER_
 #define _SWAGGER_API_INVOKER_
 
+#include <tuple>
 #include <QObject>
 #include <QUrlQuery>
+#include <QNetworkRequest>
 
 class QHttpMultiPart;
 class QNetworkReply;
 class QNetworkAccessManager;
-class QNetworkRequest;
 class QIODevice;
+class QSslError;
 
 namespace swagger {
 
-class AbstractResponse;
+using AuthSchemes = QStringList;
+
 class AbstractApiInvoker : public QObject {
-
+    Q_OBJECT
 public:
-    AbstractApiInvoker(QObject* parent = nullptr);
-    virtual QNetworkReply* invoke(const QString & path, const QByteArray & method,
-                                  QUrlQuery queryParams, QVariantMap headerParams,
-                                  QUrlQuery formParams, QHttpMultiPart* parts,
-                                  const QString & contentType, const QByteArray & body, QIODevice* device = 0);
+    using RequestParams = std::tuple<QNetworkRequest, QByteArray, QByteArray, QHttpMultiPart*, QIODevice*>;
 
-    virtual QString getBasePath();
-    virtual void onError(const AbstractResponse* const response);
+    struct InvokeResult {
+        QNetworkReply* reply;
+        enum Error {
+            NoError,
+            AuthSchemeNotReady,
+            AuthSchemeUnavailable
+        } error = NoError;
+        InvokeResult(QNetworkReply* reply, Error error = NoError)
+            : reply(reply)
+            , error(error)
+        {}
+    };
+
+
+    AbstractApiInvoker(QObject* parent = nullptr);
+
+    virtual RequestParams prepare(const QString & path, const QByteArray & method,
+                      QUrlQuery queryParams, QVariantMap headerParams,
+                      QUrlQuery formParams, QHttpMultiPart* parts,
+                      const QString & contentType, const QByteArray & body, QIODevice* device = nullptr);
+
+    InvokeResult invoke(const RequestParams & params, const AuthSchemes & authSchemes);
+
+
+    virtual QString getBasePath() const;
+
+Q_SIGNALS:
+    void authSchemesConfigurationChanged();
 
 protected:
-    virtual QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0) = 0;
+    virtual InvokeResult invoke(QNetworkRequest request, const AuthSchemes & authSchemes, const QByteArray & method,
+                                  const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = nullptr) = 0;
+private Q_SLOTS:
+    void onSslErrors( const QList<QSslError> & errors );
 
 };
 
 class ApiInvoker : public AbstractApiInvoker {
+    Q_OBJECT
 public:
     ApiInvoker(QObject* parent = nullptr);
 
 protected:
-    QNetworkReply* invoke(QNetworkRequest && request, const QByteArray & method,
-                          const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = 0);
+    InvokeResult invoke(QNetworkRequest request, const AuthSchemes & authSchemes, const QByteArray & method,
+                          const QByteArray & body, QHttpMultiPart* parts, QIODevice* device = nullptr);
 
 private:
     QNetworkAccessManager* m_nm;

@@ -1,7 +1,8 @@
-#include "UserApi.h"
-
+#include "UserApi_p.h"
+#include <array>
 #include <QUrlQuery>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
 
@@ -13,288 +14,244 @@ namespace UserApi {
 
 namespace responses {
 
-createUserResponse::createUserResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+createUserRequest::createUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-createUserResponse* createUserResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error createUserRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool createUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 0  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 0:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished0();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-createUsersWithArrayInputResponse::createUsersWithArrayInputResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+createUsersWithArrayInputRequest::createUsersWithArrayInputRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-createUsersWithArrayInputResponse* createUsersWithArrayInputResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error createUsersWithArrayInputRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool createUsersWithArrayInputResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 0  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 0:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished0();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-createUsersWithListInputResponse::createUsersWithListInputResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+createUsersWithListInputRequest::createUsersWithListInputRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-createUsersWithListInputResponse* createUsersWithListInputResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error createUsersWithListInputRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool createUsersWithListInputResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 0  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 0:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished0();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-loginUserResponse::loginUserResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+loginUserRequest::loginUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-loginUserResponse* loginUserResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error loginUserRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-loginUserResponse* loginUserResponse::on(const std::function<void(QString)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool loginUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 200:{  //QString
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for QString - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<QString>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize QString");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-logoutUserResponse::logoutUserResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+logoutUserRequest::logoutUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-logoutUserResponse* logoutUserResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error logoutUserRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool logoutUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 1> knownStatus{{ 0  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 0:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished0();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-getUserByNameResponse::getUserByNameResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+getUserByNameRequest::getUserByNameRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-getUserByNameResponse* getUserByNameResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error getUserByNameRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-getUserByNameResponse* getUserByNameResponse::on(const std::function<void(User)> & callback) {
-    m_200_fun = callback;
-    return this;
-}
-
-bool getUserByNameResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 3> knownStatus{{ 404, 200, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 200:{  //User
-            if(!m_200_fun) {
-                logSwaggerWarning("No callback defined for User - http status: %d", status);
-                return true;
-            }
             auto value = swagger::unserialize<User>(data);
             if(!value) {
                 logSwaggerError("Unable to unserialize User");
-                return false;
+                return AbstractRequest::InvalidResponse;
             }
-            m_200_fun(*value);
+            Q_EMIT finished200(*value);
             
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-updateUserResponse::updateUserResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+updateUserRequest::updateUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-updateUserResponse* updateUserResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error updateUserRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool updateUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 404, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
-deleteUserResponse::deleteUserResponse(QNetworkReply* reply, AbstractApiInvoker* invoker)
-    : AbstractResponse(reply, invoker) {
+deleteUserRequest::deleteUserRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+    : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-deleteUserResponse* deleteUserResponse::onEmptyResponse(std::function<void(int)> fun) {
-    AbstractResponse::onEmptyResponse(fun);
-    return this;
-}
+AbstractRequest::Error deleteUserRequest::processResponse(int status, const QJsonValue & data) {
+    Q_UNUSED(data);
 
-
-bool deleteUserResponse::processResponse(int status, const QJsonValue & data) {
     int callbackId = status;
     static const std::array<int, 2> knownStatus{{ 404, 400  }};
     if(std::find(std::begin(knownStatus), std::end(knownStatus), status) == std::end(knownStatus))
         callbackId = 0;
 
-    switch(callbackId) { 
+   switch(callbackId) { 
         case 404:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished404();
+            
+            return NoError;
         }
         case 400:{ 
-            Q_UNUSED(data);
-            if(m_empty_response_function)
-                m_empty_response_function(status);
+            Q_EMIT finished400();
+            
+            return NoError;
         }
         default:
-            Q_ASSERT(false);
+            return AbstractRequest::UnexpectedResponseCode;
     }
-    return false;
+    return AbstractRequest::UnknownError;
 }
 
 } //namespace responses
 
 using namespace responses;
 
+namespace operations {
 
-createUserResponse* createUser (AbstractApiInvoker* invoker,
-        Optional<User> body) {
+
+
+
+Sender<responses::createUserRequest> createUser (AbstractApiInvoker* invoker,
+        boost::optional<User> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -328,20 +285,16 @@ createUserResponse* createUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new createUserResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new createUserRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-createUsersWithArrayInputResponse* createUsersWithArrayInput (AbstractApiInvoker* invoker,
-        Optional<QVector<User>> body) {
+
+
+Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput (AbstractApiInvoker* invoker,
+        boost::optional<QVector<User>> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -375,20 +328,16 @@ createUsersWithArrayInputResponse* createUsersWithArrayInput (AbstractApiInvoker
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new createUsersWithArrayInputResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new createUsersWithArrayInputRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-createUsersWithListInputResponse* createUsersWithListInput (AbstractApiInvoker* invoker,
-        Optional<QVector<User>> body) {
+
+
+Sender<responses::createUsersWithListInputRequest> createUsersWithListInput (AbstractApiInvoker* invoker,
+        boost::optional<QVector<User>> body) {
 
     QByteArray http_method = QByteArrayLiteral("POST");
     QByteArray http_body;
@@ -422,21 +371,17 @@ createUsersWithListInputResponse* createUsersWithListInput (AbstractApiInvoker* 
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new createUsersWithListInputResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new createUsersWithListInputRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-loginUserResponse* loginUser (AbstractApiInvoker* invoker,
-        Optional<QString> username,
-        Optional<QString> password) {
+
+
+Sender<responses::loginUserRequest> loginUser (AbstractApiInvoker* invoker,
+        boost::optional<QString> username,
+        boost::optional<QString> password) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -458,19 +403,15 @@ loginUserResponse* loginUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new loginUserResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new loginUserRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-logoutUserResponse* logoutUser (AbstractApiInvoker* invoker) {
+
+
+Sender<responses::logoutUserRequest> logoutUser (AbstractApiInvoker* invoker) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
     QByteArray http_body;
@@ -490,19 +431,15 @@ logoutUserResponse* logoutUser (AbstractApiInvoker* invoker) {
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new logoutUserResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new logoutUserRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-getUserByNameResponse* getUserByName (AbstractApiInvoker* invoker,
+
+
+Sender<responses::getUserByNameRequest> getUserByName (AbstractApiInvoker* invoker,
         const QString& username) {
 
     QByteArray http_method = QByteArrayLiteral("GET");
@@ -524,21 +461,17 @@ getUserByNameResponse* getUserByName (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new getUserByNameResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new getUserByNameRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-updateUserResponse* updateUser (AbstractApiInvoker* invoker,
+
+
+Sender<responses::updateUserRequest> updateUser (AbstractApiInvoker* invoker,
         const QString& username,
-        Optional<User> body) {
+        boost::optional<User> body) {
 
     QByteArray http_method = QByteArrayLiteral("PUT");
     QByteArray http_body;
@@ -573,19 +506,15 @@ updateUserResponse* updateUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new updateUserResponse(reply, invoker);
-
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new updateUserRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
 }
 
-deleteUserResponse* deleteUser (AbstractApiInvoker* invoker,
+
+
+Sender<responses::deleteUserRequest> deleteUser (AbstractApiInvoker* invoker,
         const QString& username) {
 
     QByteArray http_method = QByteArrayLiteral("DELETE");
@@ -607,15 +536,11 @@ deleteUserResponse* deleteUser (AbstractApiInvoker* invoker,
     
 
     QHttpMultiPart* parts = nullptr;
-    if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
-    
-    }
-    else {
-    
-    }
 
-    auto reply = invoker->invoke(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
-    return new deleteUserResponse(reply, invoker);
+    auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body );
+    auto request = new deleteUserRequest(std::move(params), invoker, QStringList{  }  );
+    return request;
+}
 
 }
 

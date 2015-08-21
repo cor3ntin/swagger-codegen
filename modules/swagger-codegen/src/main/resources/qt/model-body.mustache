@@ -6,12 +6,18 @@
 
 namespace swagger {
 
+{{#vars}}{{#isEnum}}
+SWAGGER_REGISTER_ENUM({{classname}}, {{innerDatatypeWithEnum}});
+{{/isEnum}}{{/vars}}
+
+
+
 {{#hasRequiredVars}}{{{classname}}}::{{{classname}}}()
 {{#hasVars}}    : {{#vars}}m_{{name}}{}{{#hasMore}}
     , {{/hasMore}}{{/vars}} {{/hasVars}} {
 }{{/hasRequiredVars}}
 
-{{{classname}}}::{{{classname}}}({{#vars}}{{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}{{#hasMore}},
+{{{classname}}}::{{{classname}}}({{#vars}}const {{{datatypeWithEnum}}} & {{name}}{{#hasMore}},
         {{/hasMore}}{{/vars}}) {
 
 {{#vars}}    {{setter}}({{name}});
@@ -20,11 +26,11 @@ namespace swagger {
 
 
 {{#vars}}
-{{#isEnum}}{{{classname}}}::{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}} {{{classname}}}::{{getter}}() const {
+auto {{{classname}}}::{{getter}}() const -> {{{datatypeWithEnum}}} {
     return m_{{name}};
 }
 
-void  {{{classname}}}::{{setter}}({{^isEnum}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{datatype}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/isEnum}}{{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}} {{name}}) {
+void  {{{classname}}}::{{setter}}(const {{{datatypeWithEnum}}} & {{name}}) {
     m_{{name}} = {{name}};
 }
 
@@ -35,8 +41,7 @@ QJsonObject {{classname}}::serialize() const {
     QJsonObject json;
 
     {{#vars}}
-    {{#isEnum}}json.insert("{{name}}", SWAGGER_SERIALIZE_QENUM({{classname}}, {{{datatypeWithEnum}}}, m_{{name}}));{{/isEnum}}
-    {{^isEnum}}json.insert("{{name}}", swagger::serialize(m_{{name}}));{{/isEnum}}
+    json.insert("{{name}}", swagger::serialize(m_{{name}}));
     {{/vars}}
     return json;
 }
@@ -45,7 +50,7 @@ boost::optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & js
     auto it = json.end();
     {{classname}} obj;{{#vars}}
     if((it = json.find("{{name}}")) != std::end(json)) {
-        auto v = {{#isEnum}}SWAGGER_UNSERIALIZE_QENUM({{classname}}, {{{datatypeWithEnum}}}, *it){{/isEnum}}{{^isEnum}}swagger::unserialize<{{{datatype}}}>(*it){{/isEnum}};
+        auto v = swagger::unserialize<{{{datatypeWithEnum}}}>(*it);
         {{#required}}if(!v) return {};
         {{/required}}{{^required}}if(v) {{/required}}obj.{{setter}}(*v);
     }{{#required}}

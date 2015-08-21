@@ -84,8 +84,8 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     importMapping.clear();
 
     supportingFiles.clear();
-    supportingFiles.add(new SupportingFile("response-header.mustache", sourceFolder, "AbstractRequest.h"));
-    supportingFiles.add(new SupportingFile("response-body.mustache", sourceFolder, "AbstractRequest.cpp"));
+    supportingFiles.add(new SupportingFile("request-header.mustache", sourceFolder, "AbstractRequest.h"));
+    supportingFiles.add(new SupportingFile("request-body.mustache", sourceFolder, "AbstractRequest.cpp"));
     supportingFiles.add(new SupportingFile("invoker-header.mustache", sourceFolder, "ApiInvoker.h"));
     supportingFiles.add(new SupportingFile("invoker-body.mustache", sourceFolder, "ApiInvoker.cpp"));
     supportingFiles.add(new SupportingFile("utils-header.mustache", sourceFolder, "SwaggerUtils.h"));
@@ -137,6 +137,18 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
       return getSwaggerType(p) + "<QString, " + getTypeDeclaration(inner) + ">";
     }
     return super.getTypeDeclaration(p);
+  }
+
+  @Override
+  public String getEnumDeclaration(String enumName, Property container) {
+    String type = StringUtils.capitalize(enumName);
+    if(container instanceof ArrayProperty) {
+      return "QVector<" + type + ">";
+    }
+    if(container instanceof MapProperty) {
+      return "QHash<QString, " + type + ">";
+    }
+    return type;
   }
 
   @Override
@@ -195,6 +207,10 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   public String toVarName(String name) {
     String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
+
+    if(reservedWords.contains(paramName)) {
+      return escapeReservedWord(paramName);
+    }
     return paramName;
   }
 
@@ -202,6 +218,10 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   public String toParamName(String name) {
     String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
+
+    if(reservedWords.contains(paramName)) {
+      return escapeReservedWord(paramName);
+    }
     return paramName;
   }
 
@@ -234,8 +254,6 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   @Override
   public CodegenProperty fromProperty(String name, Property p) {
     CodegenProperty cp = super.fromProperty(name, p);
-    if(cp.isEnum)
-      cp.datatypeWithEnum = StringUtils.capitalize(cp.name);
     if(cp.getter != null)
       cp.getter = name;
     return cp;

@@ -16,7 +16,6 @@ namespace swagger {
 
 using AuthSchemes = QStringList;
 
-class AbstractResponse;
 class AbstractApiInvoker : public QObject {
     Q_OBJECT
 public:
@@ -46,8 +45,7 @@ public:
     InvokeResult invoke(const RequestParams & params, const AuthSchemes & authSchemes);
 
 
-    virtual QString getBasePath();
-    virtual void onError(const AbstractResponse* const response);
+    virtual QString getBasePath() const;
 
 Q_SIGNALS:
     void authSchemesConfigurationChanged();

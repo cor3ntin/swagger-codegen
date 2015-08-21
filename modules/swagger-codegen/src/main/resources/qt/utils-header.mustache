@@ -177,7 +177,7 @@ unserialize(const QJsonValue & value) {
     auto jsonArray = value.toArray();
     T array;
     array.reserve(jsonArray.size());
-    for(auto && e : jsonArray) {
+    for(const auto & e : jsonArray) {
         auto v = swagger::unserialize<typename T::value_type>(e);
         if(!v)
             return boost::optional<T>{};

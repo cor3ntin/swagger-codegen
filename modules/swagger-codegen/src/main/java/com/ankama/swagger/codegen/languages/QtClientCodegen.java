@@ -207,6 +207,10 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   public String toVarName(String name) {
     String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
+
+    if(reservedWords.contains(paramName)) {
+      return escapeReservedWord(paramName);
+    }
     return paramName;
   }
 
@@ -214,6 +218,10 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   public String toParamName(String name) {
     String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
     paramName = Character.toLowerCase(paramName.charAt(0)) + paramName.substring(1);
+
+    if(reservedWords.contains(paramName)) {
+      return escapeReservedWord(paramName);
+    }
     return paramName;
   }
 

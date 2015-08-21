@@ -249,27 +249,33 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
       }
 
       for (String tag : tags) {
-        CodegenOperation co = config.fromOperation(resourcePath, httpMethod, operation);
-        co.tags = new ArrayList<String>();
-        co.tags.add(sanitizeTag(tag));
-        config.addOperationToGroup(sanitizeTag(tag), resourcePath, operation, co, operations);
+        try {
+          CodegenOperation co = config.fromOperation(resourcePath, httpMethod, operation);
+          co.tags = new ArrayList<String>();
+          co.tags.add(sanitizeTag(tag));
+          config.addOperationToGroup(sanitizeTag(tag), resourcePath, operation, co, operations);
 
-        List<Map<String, List<String>>> securities = operation.getSecurity();
-        if(securities == null)
-          continue;
-        Map<String, SecuritySchemeDefinition> authMethods = new HashMap<String, SecuritySchemeDefinition>();
-        for (Map<String, List<String>> security : securities) {
-          if (security.size() != 1) {
-            //Not sure what to do
+          List<Map<String, List<String>>> securities = operation.getSecurity();
+          if (securities == null)
             continue;
+          Map<String, SecuritySchemeDefinition> authMethods = new HashMap<String, SecuritySchemeDefinition>();
+          for (Map<String, List<String>> security : securities) {
+            if (security.size() != 1) {
+              //Not sure what to do
+              continue;
+            }
+            String securityName = security.keySet().iterator().next();
+            SecuritySchemeDefinition securityDefinition = fromSecurity(securityName);
+            if (securityDefinition != null)
+              authMethods.put(securityName, securityDefinition);
           }
-          String securityName =  security.keySet().iterator().next();
-          SecuritySchemeDefinition securityDefinition = fromSecurity(securityName);
-          if(securityDefinition != null)
-            authMethods.put(securityName, securityDefinition);
+          if (!authMethods.isEmpty()) {
+            co.authMethods = config.fromSecurity(authMethods);
+          }
         }
-        if(!authMethods.isEmpty()) {
-          co.authMethods = config.fromSecurity(authMethods);
+        catch(java.lang.RuntimeException e) {
+          System.out.println("FAILED to generate " + operation.getOperationId());
+          throw e;
         }
       }
     }

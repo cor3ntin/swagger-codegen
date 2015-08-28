@@ -266,8 +266,6 @@ Sender<responses::createUserRequest> createUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -282,7 +280,6 @@ Sender<responses::createUserRequest> createUser (AbstractApiInvoker* invoker,
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -309,8 +306,6 @@ Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput (A
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -325,7 +320,6 @@ Sender<responses::createUsersWithArrayInputRequest> createUsersWithArrayInput (A
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -352,8 +346,6 @@ Sender<responses::createUsersWithListInputRequest> createUsersWithListInput (Abs
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -368,7 +360,6 @@ Sender<responses::createUsersWithListInputRequest> createUsersWithListInput (Abs
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -398,9 +389,6 @@ Sender<responses::loginUserRequest> loginUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -426,9 +414,6 @@ Sender<responses::logoutUserRequest> logoutUser (AbstractApiInvoker* invoker) {
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -456,9 +441,6 @@ Sender<responses::getUserByNameRequest> getUserByName (AbstractApiInvoker* invok
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -487,8 +469,6 @@ Sender<responses::updateUserRequest> updateUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -503,7 +483,6 @@ Sender<responses::updateUserRequest> updateUser (AbstractApiInvoker* invoker,
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -531,9 +510,6 @@ Sender<responses::deleteUserRequest> deleteUser (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 

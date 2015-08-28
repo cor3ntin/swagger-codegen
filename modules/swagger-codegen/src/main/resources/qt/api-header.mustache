@@ -18,7 +18,7 @@ namespace {{classname}} {
 namespace responses {
 
 {{#operation}}
-    class {{nickname}}Request;
+    class {{operationId}}Request;
 {{/operation}}
 }
 {{/operations}}
@@ -29,7 +29,7 @@ namespace operations {
 {{#authMethods}}
 //Requires authentification with scheme {{name}} ({{type}})
 {{/authMethods}}
-Sender<responses::{{nickname}}Request> {{nickname}}(AbstractApiInvoker* invoker{{#hasParams}},
+Sender<responses::{{operationId}}Request> {{operationId}}(AbstractApiInvoker* invoker{{#hasParams}},
                 {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{^required}} = {} {{/required}}{{#hasMore}},
                 {{/hasMore}}{{/allParams}});
 
@@ -40,7 +40,7 @@ Sender<responses::{{nickname}}Request> {{nickname}}(AbstractApiInvoker* invoker{
 {{#operations}}
 namespace responses {
 {{#operation}}
-namespace {{nickname}}RequestDetails {
+namespace {{operationId}}RequestDetails {
     template  <typename T>
     struct ResponseInfo {};
     {{#responses}}
@@ -95,11 +95,11 @@ namespace {{nickname}}RequestDetails {
 {{/operation}}
 
 {{#operation}}
-class {{nickname}}Request : public AbstractRequest {
+class {{operationId}}Request : public AbstractRequest {
     Q_OBJECT
 public:
-    {{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
-    {{nickname}}Request* setRawHeader(const QByteArray & k, const QByteArray & v) {
+    {{operationId}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes);
+    {{operationId}}Request* setRawHeader(const QByteArray & k, const QByteArray & v) {
         AbstractRequest::setRawHeader(k, v);
         return this;
     }
@@ -111,15 +111,15 @@ Q_SIGNALS:
 
 public:
 {{#responses}}
-    SWAGGER_SMART_SLOT({{nickname}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}})
+    SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}})
 {{/responses}}
     template <typename... Args>
-    {{nickname}}Request* then(Args... args) {
+    {{operationId}}Request* then(Args... args) {
         connect(this, &AbstractRequest::done, std::forward<Args>(args)...);
         return this;
     }
     template <typename... Args>
-    {{nickname}}Request* onUnexpectedError(Args... args) {
+    {{operationId}}Request* onUnexpectedError(Args... args) {
         connect(this, &AbstractRequest::failed, std::forward<Args>(args)...);
         return this;
     }

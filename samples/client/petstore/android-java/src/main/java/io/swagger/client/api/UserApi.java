@@ -10,6 +10,9 @@ import java.util.*;
 import io.swagger.client.model.User;
 import java.util.*;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.io.File;
@@ -35,10 +38,14 @@ public class UserApi {
   }
 
   
-  
+  /**
+   * Create user
+   * This can only be done by the logged in user.
+   * @param body Created user object
+   * @return void
+   */
   public void  createUser (User body) throws ApiException {
     Object postBody = body;
-
     
 
     // create path and map variables
@@ -46,16 +53,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -63,19 +88,18 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Creates list of users with given input array
+   * 
+   * @param body List of user object
+   * @return void
+   */
   public void  createUsersWithArrayInput (List<User> body) throws ApiException {
     Object postBody = body;
-
     
 
     // create path and map variables
@@ -83,16 +107,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -100,19 +142,18 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Creates list of users with given input array
+   * 
+   * @param body List of user object
+   * @return void
+   */
   public void  createUsersWithListInput (List<User> body) throws ApiException {
     Object postBody = body;
-
     
 
     // create path and map variables
@@ -120,16 +161,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "POST", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -137,19 +196,19 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Logs user into the system
+   * 
+   * @param username The user name for login
+   * @param password The password for login in clear text
+   * @return String
+   */
   public String  loginUser (String username, String password) throws ApiException {
     Object postBody = null;
-
     
 
     // create path and map variables
@@ -157,20 +216,38 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
-    if(!"null".equals(String.valueOf(username)))
-      queryParams.put("username", String.valueOf(username));
-    if(!"null".equals(String.valueOf(password)))
-      queryParams.put("password", String.valueOf(password));
+    if (username != null)
+      queryParams.put("username", ApiInvoker.parameterToString(username));
+    if (password != null)
+      queryParams.put("password", ApiInvoker.parameterToString(password));
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return (String) ApiInvoker.deserialize(response, "", String.class);
       }
@@ -178,19 +255,17 @@ public class UserApi {
         return null;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return  null;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Logs out current logged in user session
+   * 
+   * @return void
+   */
   public void  logoutUser () throws ApiException {
     Object postBody = null;
-
     
 
     // create path and map variables
@@ -198,16 +273,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -215,19 +308,23 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Get user by user name
+   * 
+   * @param username The name that needs to be fetched. Use user1 for testing. 
+   * @return User
+   */
   public User  getUserByName (String username) throws ApiException {
     Object postBody = null;
-
+    
+    // verify the required parameter 'username' is set
+    if (username == null) {
+       throw new ApiException(400, "Missing the required parameter 'username' when calling getUserByName");
+    }
     
 
     // create path and map variables
@@ -235,16 +332,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "GET", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return (User) ApiInvoker.deserialize(response, "", User.class);
       }
@@ -252,19 +367,24 @@ public class UserApi {
         return null;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return  null;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Updated user
+   * This can only be done by the logged in user.
+   * @param username name that need to be deleted
+   * @param body Updated user object
+   * @return void
+   */
   public void  updateUser (String username, User body) throws ApiException {
     Object postBody = body;
-
+    
+    // verify the required parameter 'username' is set
+    if (username == null) {
+       throw new ApiException(400, "Missing the required parameter 'username' when calling updateUser");
+    }
     
 
     // create path and map variables
@@ -272,16 +392,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "PUT", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "PUT", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -289,19 +427,23 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   
-  
+  /**
+   * Delete user
+   * This can only be done by the logged in user.
+   * @param username The name that needs to be deleted
+   * @return void
+   */
   public void  deleteUser (String username) throws ApiException {
     Object postBody = null;
-
+    
+    // verify the required parameter 'username' is set
+    if (username == null) {
+       throw new ApiException(400, "Missing the required parameter 'username' when calling deleteUser");
+    }
     
 
     // create path and map variables
@@ -309,16 +451,34 @@ public class UserApi {
 
     // query params
     Map<String, String> queryParams = new HashMap<String, String>();
+    // header params
     Map<String, String> headerParams = new HashMap<String, String>();
+    // form params
+    Map<String, String> formParams = new HashMap<String, String>();
 
     
 
     
 
-    String contentType = "application/json";
+    String[] contentTypes = {
+      
+    };
+    String contentType = contentTypes.length > 0 ? contentTypes[0] : "application/json";
+
+    if (contentType.startsWith("multipart/form-data")) {
+      // file uploading
+      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+      
+
+      HttpEntity httpEntity = builder.build();
+      postBody = httpEntity;
+    } else {
+      // normal form params
+      
+    }
 
     try {
-      String response = apiInvoker.invokeAPI(basePath, path, "DELETE", queryParams, postBody, headerParams, contentType);
+      String response = apiInvoker.invokeAPI(basePath, path, "DELETE", queryParams, postBody, headerParams, formParams, contentType);
       if(response != null){
         return ;
       }
@@ -326,12 +486,7 @@ public class UserApi {
         return ;
       }
     } catch (ApiException ex) {
-      if(ex.getCode() == 404) {
-        return ;
-      }
-      else {
-        throw ex;
-      }
+      throw ex;
     }
   }
   

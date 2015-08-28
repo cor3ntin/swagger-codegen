@@ -22,12 +22,14 @@ public interface CodegenConfig {
   String toApiVarName(String name);
   String toModelName(String name);
   String toParamName(String name);
+  String escapeText(String text);
   String escapeReservedWord(String name);
   String getTypeDeclaration(Property p);
   String getTypeDeclaration(String name);
   String getEnumDeclaration(String enumName, Property container);
 
   void processOpts();
+  String generateExamplePath(String path, Operation operation);
 
   Set<String> reservedWords();
 
@@ -37,7 +39,7 @@ public interface CodegenConfig {
   String getOutputDir();
 
   CodegenModel fromModel(String name, Model model);
-  CodegenOperation fromOperation(String resourcePath, String httpMethod, Operation operation);
+  CodegenOperation fromOperation(String resourcePath, String httpMethod, Operation operation, Map<String, Model> definitions);
   List<CodegenSecurity> fromSecurity(Map<String, SecuritySchemeDefinition> schemes);
 
   Set<String> defaultIncludes();
@@ -56,4 +58,8 @@ public interface CodegenConfig {
   Map<String, Object> postProcessModels(Map<String, Object> objs);
   Map<String, Object> postProcessOperations(Map<String, Object> objs);
   Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs);
+
+  String apiFilename(String templateName, String tag);
+
+  boolean shouldOverwrite(String filename);
 }

@@ -1,9 +1,13 @@
 #import "SWGStoreApi.h"
 #import "SWGFile.h"
+#import "SWGQueryParamCollection.h"
 #import "SWGApiClient.h"
 #import "SWGOrder.h"
 
 
+@interface SWGStoreApi ()
+    @property (readwrite, nonatomic, strong) NSMutableDictionary *defaultHeaders;
+@end
 
 @implementation SWGStoreApi
 static NSString * basePath = @"http://petstore.swagger.io/v2";
@@ -31,18 +35,19 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
 }
 
 -(void) addHeader:(NSString*)value forKey:(NSString*)key {
-    [[self apiClient] setHeaderValue:value forKey:key];
+    [self.defaultHeaders setValue:value forKey:key];
 }
 
 -(id) init {
     self = [super init];
+    self.defaultHeaders = [NSMutableDictionary dictionary];
     [self apiClient];
     return self;
 }
 
 -(void) setHeaderValue:(NSString*) value
            forKey:(NSString*)key {
-    [[self apiClient] setHeaderValue:value forKey:key];
+    [self.defaultHeaders setValue:value forKey:key];
 }
 
 -(unsigned long) requestQueueSize {
@@ -50,9 +55,16 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
 }
 
 
+/*!
+ * Returns pet inventories by status
+ * Returns a map of status codes to quantities
+ * \returns NSDictionary*
+ */
 -(NSNumber*) getInventoryWithCompletionBlock: 
         (void (^)(NSDictionary* output, NSError* error))completionBlock
          {
+
+    
 
     NSMutableString* requestUrl = [NSMutableString stringWithFormat:@"%@/store/inventory", basePath];
 
@@ -62,29 +74,45 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
 
     
 
-    NSString* requestContentType = @"application/json";
-    NSString* responseContentType = @"application/json";
-
     NSMutableDictionary* queryParams = [[NSMutableDictionary alloc] init];
     
-    NSMutableDictionary* headerParams = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* headerParams = [NSMutableDictionary dictionaryWithDictionary:self.defaultHeaders];
+
     
+    
+    // HTTP header `Accept` 
+    headerParams[@"Accept"] = [SWGApiClient selectHeaderAccept:@[@"application/json", @"application/xml"]];
+    if ([headerParams[@"Accept"] length] == 0) {
+        [headerParams removeObjectForKey:@"Accept"];
+    }
+
+    // response content type
+    NSString *responseContentType;
+    if ([headerParams objectForKey:@"Accept"]) {
+        responseContentType = [headerParams[@"Accept"] componentsSeparatedByString:@", "][0];
+    }
+    else {
+        responseContentType = @"";
+    }
+
+    // request content type
+    NSString *requestContentType = [SWGApiClient selectHeaderContentType:@[]];
 
     id bodyDictionary = nil;
     
     
-    bodyDictionary = [[NSMutableArray alloc] init];
 
-    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init]; 
+    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init];
 
     
-    [bodyDictionary addObject:formParams];
     
 
     
 
     SWGApiClient* client = [SWGApiClient sharedClientFromPool:basePath];
 
+    
+    // response is in a container
         // map container response type
     return [client dictionary: requestUrl 
                        method: @"GET" 
@@ -107,13 +135,24 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
                 
             }];
     
+
+    
+
     
 }
 
+/*!
+ * Place an order for a pet
+ * 
+ * \param body order placed for purchasing the pet
+ * \returns SWGOrder*
+ */
 -(NSNumber*) placeOrderWithCompletionBlock: (SWGOrder*) body
         
         completionHandler: (void (^)(SWGOrder* output, NSError* error))completionBlock
          {
+
+    
 
     NSMutableString* requestUrl = [NSMutableString stringWithFormat:@"%@/store/order", basePath];
 
@@ -123,13 +162,29 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
 
     
 
-    NSString* requestContentType = @"application/json";
-    NSString* responseContentType = @"application/json";
-
     NSMutableDictionary* queryParams = [[NSMutableDictionary alloc] init];
     
-    NSMutableDictionary* headerParams = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* headerParams = [NSMutableDictionary dictionaryWithDictionary:self.defaultHeaders];
+
     
+    
+    // HTTP header `Accept` 
+    headerParams[@"Accept"] = [SWGApiClient selectHeaderAccept:@[@"application/json", @"application/xml"]];
+    if ([headerParams[@"Accept"] length] == 0) {
+        [headerParams removeObjectForKey:@"Accept"];
+    }
+
+    // response content type
+    NSString *responseContentType;
+    if ([headerParams objectForKey:@"Accept"]) {
+        responseContentType = [headerParams[@"Accept"] componentsSeparatedByString:@", "][0];
+    }
+    else {
+        responseContentType = @"";
+    }
+
+    // request content type
+    NSString *requestContentType = [SWGApiClient selectHeaderContentType:@[]];
 
     id bodyDictionary = nil;
     
@@ -138,8 +193,8 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     if(__body != nil && [__body isKindOfClass:[NSArray class]]){
         NSMutableArray * objs = [[NSMutableArray alloc] init];
         for (id dict in (NSArray*)__body) {
-            if([dict respondsToSelector:@selector(asDictionary)]) {
-                [objs addObject:[(SWGObject*)dict asDictionary]];
+            if([dict respondsToSelector:@selector(toDictionary)]) {
+                [objs addObject:[(SWGObject*)dict toDictionary]];
             }
             else{
                 [objs addObject:dict];
@@ -147,8 +202,8 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
         }
         bodyDictionary = objs;
     }
-    else if([__body respondsToSelector:@selector(asDictionary)]) {
-        bodyDictionary = [(SWGObject*)__body asDictionary];
+    else if([__body respondsToSelector:@selector(toDictionary)]) {
+        bodyDictionary = [(SWGObject*)__body toDictionary];
     }
     else if([__body isKindOfClass:[NSString class]]) {
         // convert it to a dictionary
@@ -168,14 +223,20 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     SWGApiClient* client = [SWGApiClient sharedClientFromPool:basePath];
 
     
+
     
+    // non container response
+
     
+
+    
+    // complex response
         
     // comples response type
-    return [client dictionary: requestUrl 
-                       method: @"POST" 
-                  queryParams: queryParams 
-                         body: bodyDictionary 
+    return [client dictionary: requestUrl
+                       method: @"POST"
+                  queryParams: queryParams
+                         body: bodyDictionary
                  headerParams: headerParams
            requestContentType: requestContentType
           responseContentType: responseContentType
@@ -185,23 +246,36 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
                     
                     return;
                 }
-                
-                SWGOrder *result = nil;
+                SWGOrder* result = nil;
                 if (data) {
-                    result = [[SWGOrder    alloc]initWithValues: data];
+                    result = [[SWGOrder  alloc]  initWithDictionary:data error:nil];
                 }
                 completionBlock(result , nil);
                 
               }];
     
+
+    
+
     
 }
 
+/*!
+ * Find purchase order by ID
+ * For valid response try integer IDs with value <= 5 or > 10. Other values will generated exceptions
+ * \param orderId ID of pet that needs to be fetched
+ * \returns SWGOrder*
+ */
 -(NSNumber*) getOrderByIdWithCompletionBlock: (NSString*) orderId
         
         completionHandler: (void (^)(SWGOrder* output, NSError* error))completionBlock
          {
 
+    
+    // verify the required parameter 'orderId' is set
+    NSAssert(orderId != nil, @"Missing the required parameter `orderId` when calling getOrderById");
+    
+
     NSMutableString* requestUrl = [NSMutableString stringWithFormat:@"%@/store/order/{orderId}", basePath];
 
     // remove format in URL if needed
@@ -211,23 +285,37 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     [requestUrl replaceCharactersInRange: [requestUrl rangeOfString:[NSString stringWithFormat:@"%@%@%@", @"{", @"orderId", @"}"]] withString: [SWGApiClient escape:orderId]];
     
 
-    NSString* requestContentType = @"application/json";
-    NSString* responseContentType = @"application/json";
-
     NSMutableDictionary* queryParams = [[NSMutableDictionary alloc] init];
     
-    NSMutableDictionary* headerParams = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* headerParams = [NSMutableDictionary dictionaryWithDictionary:self.defaultHeaders];
+
     
+    
+    // HTTP header `Accept` 
+    headerParams[@"Accept"] = [SWGApiClient selectHeaderAccept:@[@"application/json", @"application/xml"]];
+    if ([headerParams[@"Accept"] length] == 0) {
+        [headerParams removeObjectForKey:@"Accept"];
+    }
+
+    // response content type
+    NSString *responseContentType;
+    if ([headerParams objectForKey:@"Accept"]) {
+        responseContentType = [headerParams[@"Accept"] componentsSeparatedByString:@", "][0];
+    }
+    else {
+        responseContentType = @"";
+    }
+
+    // request content type
+    NSString *requestContentType = [SWGApiClient selectHeaderContentType:@[]];
 
     id bodyDictionary = nil;
     
     
-    bodyDictionary = [[NSMutableArray alloc] init];
 
-    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init]; 
+    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init];
 
     
-    [bodyDictionary addObject:formParams];
     
 
     
@@ -235,14 +323,20 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     SWGApiClient* client = [SWGApiClient sharedClientFromPool:basePath];
 
     
+
     
+    // non container response
+
     
+
+    
+    // complex response
         
     // comples response type
-    return [client dictionary: requestUrl 
-                       method: @"GET" 
-                  queryParams: queryParams 
-                         body: bodyDictionary 
+    return [client dictionary: requestUrl
+                       method: @"GET"
+                  queryParams: queryParams
+                         body: bodyDictionary
                  headerParams: headerParams
            requestContentType: requestContentType
           responseContentType: responseContentType
@@ -252,22 +346,35 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
                     
                     return;
                 }
-                
-                SWGOrder *result = nil;
+                SWGOrder* result = nil;
                 if (data) {
-                    result = [[SWGOrder    alloc]initWithValues: data];
+                    result = [[SWGOrder  alloc]  initWithDictionary:data error:nil];
                 }
                 completionBlock(result , nil);
                 
               }];
     
+
+    
+
     
 }
 
+/*!
+ * Delete purchase order by ID
+ * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
+ * \param orderId ID of the order that needs to be deleted
+ * \returns void
+ */
 -(NSNumber*) deleteOrderWithCompletionBlock: (NSString*) orderId
         
         
         completionHandler: (void (^)(NSError* error))completionBlock {
+
+    
+    // verify the required parameter 'orderId' is set
+    NSAssert(orderId != nil, @"Missing the required parameter `orderId` when calling deleteOrder");
+    
 
     NSMutableString* requestUrl = [NSMutableString stringWithFormat:@"%@/store/order/{orderId}", basePath];
 
@@ -278,23 +385,37 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     [requestUrl replaceCharactersInRange: [requestUrl rangeOfString:[NSString stringWithFormat:@"%@%@%@", @"{", @"orderId", @"}"]] withString: [SWGApiClient escape:orderId]];
     
 
-    NSString* requestContentType = @"application/json";
-    NSString* responseContentType = @"application/json";
-
     NSMutableDictionary* queryParams = [[NSMutableDictionary alloc] init];
     
-    NSMutableDictionary* headerParams = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* headerParams = [NSMutableDictionary dictionaryWithDictionary:self.defaultHeaders];
+
     
+    
+    // HTTP header `Accept` 
+    headerParams[@"Accept"] = [SWGApiClient selectHeaderAccept:@[@"application/json", @"application/xml"]];
+    if ([headerParams[@"Accept"] length] == 0) {
+        [headerParams removeObjectForKey:@"Accept"];
+    }
+
+    // response content type
+    NSString *responseContentType;
+    if ([headerParams objectForKey:@"Accept"]) {
+        responseContentType = [headerParams[@"Accept"] componentsSeparatedByString:@", "][0];
+    }
+    else {
+        responseContentType = @"";
+    }
+
+    // request content type
+    NSString *requestContentType = [SWGApiClient selectHeaderContentType:@[]];
 
     id bodyDictionary = nil;
     
     
-    bodyDictionary = [[NSMutableArray alloc] init];
 
-    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init]; 
+    NSMutableDictionary * formParams = [[NSMutableDictionary alloc]init];
 
     
-    [bodyDictionary addObject:formParams];
     
 
     
@@ -302,12 +423,12 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
     SWGApiClient* client = [SWGApiClient sharedClientFromPool:basePath];
 
     
+
     
-            // primitive response type
+
     
-    
-    // no return base type
-    return [client stringWithCompletionBlock: requestUrl 
+    // it's void
+        return [client stringWithCompletionBlock: requestUrl 
                                       method: @"DELETE" 
                                  queryParams: queryParams 
                                         body: bodyDictionary 
@@ -321,9 +442,7 @@ static NSString * basePath = @"http://petstore.swagger.io/v2";
                 }
                 completionBlock(nil);
                     }];
-    
-    
-    
+
     
 }
 

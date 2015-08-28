@@ -1,7 +1,10 @@
 package com.wordnik.swagger.codegen;
 
 public class CodegenSecurity {
-  String name;
-  String type;
-  Boolean hasMore;
+  public String name;
+  public String type;
+  public Boolean hasMore, isBasic, isOAuth, isApiKey;
+  // ApiKey specific
+  public String keyParamName;
+  public Boolean isKeyInQuery, isKeyInHeader;
 }

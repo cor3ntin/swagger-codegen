@@ -1,0 +1,12 @@
+package {{apiPackage}}
+
+import {{modelPackage}}._
+import com.ankama.cohen.swagger.client.EnumNameSerializer
+import org.json4s._
+
+object EnumsSerializers {
+
+  def all = Seq[Serializer[_]](){{#models}}{{#model}}{{#hasEnums}}{{#vars}}{{#isEnum}} :+
+    new EnumNameSerializer({{classname}}Enums.{{datatypeWithEnum}}){{/isEnum}}{{/vars}}{{/hasEnums}}{{/model}}{{/models}}
+
+}

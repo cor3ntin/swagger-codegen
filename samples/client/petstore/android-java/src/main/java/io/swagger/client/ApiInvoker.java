@@ -1,20 +1,16 @@
 package io.swagger.client;
 
-
-import com.fasterxml.jackson.core.JsonGenerator.Feature;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import org.apache.http.*;
 import org.apache.http.client.*;
 import org.apache.http.client.methods.*;
 import org.apache.http.conn.*;
 import org.apache.http.conn.scheme.*;
 import org.apache.http.conn.ssl.*;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.*;
+import org.apache.http.impl.conn.tsccm.*;
 import org.apache.http.params.*;
 import org.apache.http.util.EntityUtils;
 
@@ -23,6 +19,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.net.URLEncoder;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +37,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +49,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.gson.JsonParseException;
+
 public class ApiInvoker {
   private static ApiInvoker INSTANCE = new ApiInvoker();
   private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
@@ -60,6 +60,77 @@ public class ApiInvoker {
   private boolean ignoreSSLCertificates = false;
 
   private ClientConnectionManager ignoreSSLConnectionManager;
+
+  /** Content type "text/plain" with UTF-8 encoding. */
+  public static final ContentType TEXT_PLAIN_UTF8 = ContentType.create("text/plain", Consts.UTF_8);
+
+  /**
+   * ISO 8601 date time format.
+   * @see https://en.wikipedia.org/wiki/ISO_8601
+   */
+  public static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+  /**
+   * ISO 8601 date format.
+   * @see https://en.wikipedia.org/wiki/ISO_8601
+   */
+  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+  static {
+    // Use UTC as the default time zone.
+    DATE_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+    // Set default User-Agent.
+    setUserAgent("Android-Java-Swagger");
+  }
+
+  public static void setUserAgent(String userAgent) {
+    INSTANCE.addDefaultHeader("User-Agent", userAgent);
+  }
+
+  public static Date parseDateTime(String str) {
+    try {
+      return DATE_TIME_FORMAT.parse(str);
+    } catch (java.text.ParseException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static Date parseDate(String str) {
+    try {
+      return DATE_FORMAT.parse(str);
+    } catch (java.text.ParseException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String formatDateTime(Date datetime) {
+    return DATE_TIME_FORMAT.format(datetime);
+  }
+
+  public static String formatDate(Date date) {
+    return DATE_FORMAT.format(date);
+  }
+
+  public static String parameterToString(Object param) {
+    if (param == null) {
+      return "";
+    } else if (param instanceof Date) {
+      return formatDateTime((Date) param);
+    } else if (param instanceof Collection) {
+      StringBuilder b = new StringBuilder();
+      for(Object o : (Collection)param) {
+        if(b.length() > 0) {
+          b.append(",");
+        }
+        b.append(String.valueOf(o));
+      }
+      return b.toString();
+    } else {
+      return String.valueOf(param);
+    }
+  }
 
   public ApiInvoker() {
     initConnectionManager();
@@ -83,31 +154,29 @@ public class ApiInvoker {
 
   public static Object deserialize(String json, String containerType, Class cls) throws ApiException {
     try{
-      if("List".equals(containerType)) {
-        JavaType typeInfo = JsonUtil.getJsonMapper().getTypeFactory().constructCollectionType(List.class, cls);
-        List response = (List<?>) JsonUtil.getJsonMapper().readValue(json, typeInfo);
-        return response;
+      if("list".equalsIgnoreCase(containerType) || "array".equalsIgnoreCase(containerType)) {
+        return JsonUtil.deserializeToList(json, cls);
       }
       else if(String.class.equals(cls)) {
         if(json != null && json.startsWith("\"") && json.endsWith("\"") && json.length() > 1)
           return json.substring(1, json.length() - 2);
-        else 
+        else
           return json;
       }
       else {
-        return JsonUtil.getJsonMapper().readValue(json, cls);
+        return JsonUtil.deserializeToObject(json, cls);
       }
     }
-    catch (IOException e) {
+    catch (JsonParseException e) {
       throw new ApiException(500, e.getMessage());
     }
   }
 
   public static String serialize(Object obj) throws ApiException {
     try {
-      if (obj != null) 
-        return JsonUtil.getJsonMapper().writeValueAsString(obj);
-      else 
+      if (obj != null)
+        return JsonUtil.serialize(obj);
+      else
         return null;
     }
     catch (Exception e) {
@@ -115,7 +184,7 @@ public class ApiInvoker {
     }
   }
 
-  public String invokeAPI(String host, String path, String method, Map<String, String> queryParams, Object body, Map<String, String> headerParams, String contentType) throws ApiException {
+  public String invokeAPI(String host, String path, String method, Map<String, String> queryParams, Object body, Map<String, String> headerParams, Map<String, String> formParams, String contentType) throws ApiException {
     HttpClient client = getClient(host);
 
     StringBuilder b = new StringBuilder();
@@ -136,7 +205,7 @@ public class ApiInvoker {
     for(String key : headerParams.keySet()) {
       headers.put(key, headerParams.get(key));
     }
-    
+
     for(String key : defaultHeaderMap.keySet()) {
       if(!headerParams.containsKey(key)) {
         headers.put(key, defaultHeaderMap.get(key));
@@ -144,9 +213,34 @@ public class ApiInvoker {
     }
     headers.put("Accept", "application/json");
 
+    // URL encoded string from form parameters
+    String formParamStr = null;
+
+    // for form data
+    if ("application/x-www-form-urlencoded".equals(contentType)) {
+      StringBuilder formParamBuilder = new StringBuilder();
+
+      // encode the form params
+      for (String key : formParams.keySet()) {
+        String value = formParams.get(key);
+        if (value != null && !"".equals(value.trim())) {
+          if (formParamBuilder.length() > 0) {
+            formParamBuilder.append("&");
+          }
+          try {
+            formParamBuilder.append(URLEncoder.encode(key, "utf8")).append("=").append(URLEncoder.encode(value, "utf8"));
+          }
+          catch (Exception e) {
+            // move on to next
+          }
+        }
+      }
+      formParamStr = formParamBuilder.toString();
+    }
+
     HttpResponse response = null;
-    try{
-      if("GET".equals(method)) {
+    try {
+      if ("GET".equals(method)) {
         HttpGet get = new HttpGet(url);
         get.addHeader("Accept", "application/json");
         for(String key : headers.keySet()) {
@@ -156,10 +250,17 @@ public class ApiInvoker {
       }
       else if ("POST".equals(method)) {
         HttpPost post = new HttpPost(url);
-
-        if (body != null) {
+        if (formParamStr != null) {
           post.setHeader("Content-Type", contentType);
-          post.setEntity(new StringEntity(serialize(body), "UTF-8"));
+          post.setEntity(new StringEntity(formParamStr, "UTF-8"));
+        } else if (body != null) {
+          if (body instanceof HttpEntity) {
+            // this is for file uploading
+            post.setEntity((HttpEntity) body);
+          } else {
+            post.setHeader("Content-Type", contentType);
+            post.setEntity(new StringEntity(serialize(body), "UTF-8"));
+          }
         }
         for(String key : headers.keySet()) {
           post.setHeader(key, headers.get(key));
@@ -168,7 +269,10 @@ public class ApiInvoker {
       }
       else if ("PUT".equals(method)) {
         HttpPut put = new HttpPut(url);
-        if(body != null) {
+        if (formParamStr != null) {
+          put.setHeader("Content-Type", contentType);
+          put.setEntity(new StringEntity(formParamStr, "UTF-8"));
+        } else if (body != null) {
           put.setHeader("Content-Type", contentType);
           put.setEntity(new StringEntity(serialize(body), "UTF-8"));
         }
@@ -186,8 +290,10 @@ public class ApiInvoker {
       }
       else if ("PATCH".equals(method)) {
         HttpPatch patch = new HttpPatch(url);
-
-        if (body != null) {
+        if (formParamStr != null) {
+          patch.setHeader("Content-Type", contentType);
+          patch.setEntity(new StringEntity(formParamStr, "UTF-8"));
+        } else if (body != null) {
           patch.setHeader("Content-Type", contentType);
           patch.setEntity(new StringEntity(serialize(body), "UTF-8"));
         }
@@ -199,13 +305,14 @@ public class ApiInvoker {
 
       int code = response.getStatusLine().getStatusCode();
       String responseString = null;
-      if(code == 204) 
+      if(code == 204)
         responseString = "";
       else if(code >= 200 && code < 300) {
         if(response.getEntity() != null) {
           HttpEntity resEntity = response.getEntity();
           responseString = EntityUtils.toString(resEntity);
         }
+        return responseString;
       }
       else {
         if(response.getEntity() != null) {
@@ -214,9 +321,8 @@ public class ApiInvoker {
         }
         else
           responseString = "no data";
-        throw new ApiException(code, responseString);
       }
-      return responseString;
+      throw new ApiException(code, responseString);
     }
     catch(IOException e) {
       throw new ApiException(500, e.getMessage());
@@ -270,7 +376,7 @@ public class ApiInvoker {
       schemeRegistry.register(httpsScheme);
       schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 
-      ignoreSSLConnectionManager = new SingleClientConnManager(new BasicHttpParams(), schemeRegistry);
+      ignoreSSLConnectionManager = new ThreadSafeClientConnManager(new BasicHttpParams(), schemeRegistry);
     } catch (NoSuchAlgorithmException e) {
       // This will only be thrown if SSL isn't available for some reason.
     } catch (KeyManagementException e) {

@@ -169,9 +169,6 @@ Sender<responses::getInventoryRequest> getInventory (AbstractApiInvoker* invoker
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -198,8 +195,6 @@ Sender<responses::placeOrderRequest> placeOrder (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -214,7 +209,6 @@ Sender<responses::placeOrderRequest> placeOrder (AbstractApiInvoker* invoker,
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -242,9 +236,6 @@ Sender<responses::getOrderByIdRequest> getOrderById (AbstractApiInvoker* invoker
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -272,9 +263,6 @@ Sender<responses::deleteOrderRequest> deleteOrder (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 

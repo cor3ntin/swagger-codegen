@@ -7,7 +7,6 @@ import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.codegen.*;
 import com.wordnik.swagger.models.properties.*;
 import org.apache.commons.lang.StringUtils;
-import sun.org.mozilla.javascript.optimizer.*;
 
 import java.util.*;
 import java.io.File;
@@ -203,6 +202,11 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     return initialCaps(name) + "Api";
   }
 
+
+
+  @Override
+  public String toOperationId(String operationId) { return initialCaps(operationId); }
+
   @Override
   public String toVarName(String name) {
     String paramName = name.replaceAll("[^a-zA-Z0-9_]", "");
@@ -233,7 +237,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     ListIterator<CodegenProperty> it = m.vars.listIterator();
     while (it.hasNext()) {
       CodegenProperty p = it.next();
-      if (p.required) {
+      if (p.required != null) {
         params.add(p);
         it.remove();
       }
@@ -265,7 +269,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     ListIterator<CodegenParameter> it = parameters.listIterator();
     while(it.hasNext()) {
       CodegenParameter p = it.next();
-      if(p.required)
+      if(p.required != null)
         required.add(p);
       else
         optionals.add(p);
@@ -282,9 +286,9 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
   }
 
   @Override
-  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation) {
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
     //put required parameters first
-    CodegenOperation op = super.fromOperation(path, httpMethod, operation);
+    CodegenOperation op = super.fromOperation(path, httpMethod, operation, definitions);
     op.allParams = sortCPPFunctionParameters(op.allParams);
     op.formParams = sortCPPFunctionParameters(op.formParams);
     op.queryParams = sortCPPFunctionParameters(op.queryParams);

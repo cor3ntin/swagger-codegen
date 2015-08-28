@@ -3,27 +3,32 @@ package io.swagger.client.model;
 import java.util.Date;
 
 import com.wordnik.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 
 @ApiModel(description = "")
 public class Order  {
   
+  @SerializedName("id")
   private Long id = null;
+  @SerializedName("petId")
   private Long petId = null;
+  @SerializedName("quantity")
   private Integer quantity = null;
+  @SerializedName("shipDate")
   private Date shipDate = null;
   public enum StatusEnum {
      placed,  approved,  delivered, 
   };
+  @SerializedName("status")
   private StatusEnum status = null;
+  @SerializedName("complete")
   private Boolean complete = null;
 
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("id")
+  @ApiModelProperty(value = "")
   public Long getId() {
     return id;
   }
@@ -34,8 +39,7 @@ public class Order  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("petId")
+  @ApiModelProperty(value = "")
   public Long getPetId() {
     return petId;
   }
@@ -46,8 +50,7 @@ public class Order  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("quantity")
+  @ApiModelProperty(value = "")
   public Integer getQuantity() {
     return quantity;
   }
@@ -58,8 +61,7 @@ public class Order  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("shipDate")
+  @ApiModelProperty(value = "")
   public Date getShipDate() {
     return shipDate;
   }
@@ -71,8 +73,7 @@ public class Order  {
   /**
    * Order Status
    **/
-  @ApiModelProperty(required = false, value = "Order Status")
-  @JsonProperty("status")
+  @ApiModelProperty(value = "Order Status")
   public StatusEnum getStatus() {
     return status;
   }
@@ -83,8 +84,7 @@ public class Order  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("complete")
+  @ApiModelProperty(value = "")
   public Boolean getComplete() {
     return complete;
   }

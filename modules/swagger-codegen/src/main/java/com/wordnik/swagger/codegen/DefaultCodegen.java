@@ -1,19 +1,68 @@
 package com.wordnik.swagger.codegen;
 
-import com.wordnik.swagger.models.*;
-import com.wordnik.swagger.models.auth.SecuritySchemeDefinition;
-import com.wordnik.swagger.models.parameters.*;
-import com.wordnik.swagger.models.properties.*;
-import com.wordnik.swagger.util.Json;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.wordnik.swagger.codegen.examples.ExampleGenerator;
+import com.wordnik.swagger.models.ArrayModel;
+import com.wordnik.swagger.models.ComposedModel;
+import com.wordnik.swagger.models.Model;
+import com.wordnik.swagger.models.ModelImpl;
+import com.wordnik.swagger.models.Operation;
+import com.wordnik.swagger.models.RefModel;
+import com.wordnik.swagger.models.Response;
+import com.wordnik.swagger.models.Swagger;
+import com.wordnik.swagger.models.auth.ApiKeyAuthDefinition;
+import com.wordnik.swagger.models.auth.BasicAuthDefinition;
+import com.wordnik.swagger.models.auth.In;
+import com.wordnik.swagger.models.auth.SecuritySchemeDefinition;
+import com.wordnik.swagger.models.parameters.BodyParameter;
+import com.wordnik.swagger.models.parameters.CookieParameter;
+import com.wordnik.swagger.models.parameters.FormParameter;
+import com.wordnik.swagger.models.parameters.HeaderParameter;
+import com.wordnik.swagger.models.parameters.Parameter;
+import com.wordnik.swagger.models.parameters.PathParameter;
+import com.wordnik.swagger.models.parameters.QueryParameter;
+import com.wordnik.swagger.models.parameters.SerializableParameter;
+import com.wordnik.swagger.models.properties.AbstractNumericProperty;
+import com.wordnik.swagger.models.properties.ArrayProperty;
+import com.wordnik.swagger.models.properties.BooleanProperty;
+import com.wordnik.swagger.models.properties.DateProperty;
+import com.wordnik.swagger.models.properties.DateTimeProperty;
+import com.wordnik.swagger.models.properties.DecimalProperty;
+import com.wordnik.swagger.models.properties.DoubleProperty;
+import com.wordnik.swagger.models.properties.FloatProperty;
+import com.wordnik.swagger.models.properties.IntegerProperty;
+import com.wordnik.swagger.models.properties.LongProperty;
+import com.wordnik.swagger.models.properties.MapProperty;
+import com.wordnik.swagger.models.properties.Property;
+import com.wordnik.swagger.models.properties.PropertyBuilder;
+import com.wordnik.swagger.models.properties.RefProperty;
+import com.wordnik.swagger.models.properties.StringProperty;
+import com.wordnik.swagger.util.Json;
+
 
 public class DefaultCodegen {
-  Logger LOGGER = LoggerFactory.getLogger(DefaultCodegen.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCodegen.class);
 
   protected String outputFolder = "";
   protected Set<String> defaultIncludes = new HashSet<String>();
@@ -56,7 +105,7 @@ public class DefaultCodegen {
   // override with any special text escaping logic
   public String escapeText(String input) {
     if(input != null) {
-      String output = input.replaceAll("\n", " ");
+      String output = input.replaceAll("\n", "\\\\n");
       output = output.replace("\"", "\\\"");
       return output;
     }
@@ -130,7 +179,7 @@ public class DefaultCodegen {
   }
 
   public String toApiFilename(String name) {
-    return initialCaps(name) + "Api";
+    return toApiName(name);
   }
 
   public String toApiVarName(String name) {
@@ -138,7 +187,7 @@ public class DefaultCodegen {
   }
 
   public String toModelFilename(String name) {
-    return name;
+    return initialCaps(name);
   }
 
   public String toOperationId(String operationId) { return operationId; }
@@ -151,12 +200,16 @@ public class DefaultCodegen {
   }
 
   public String toParamName(String name) {
+    name = removeNonNameElementToCamelCase(name);
     if(reservedWords.contains(name)) {
       return escapeReservedWord(name);
     }
     return name;
   }
 
+  public String toEnumName(CodegenProperty property) {
+    return StringUtils.capitalize(property.name) + "Enum";
+  }
 
   public String escapeReservedWord(String name) {
     throw new RuntimeException("reserved word " + name + " not allowed");
@@ -230,6 +283,55 @@ public class DefaultCodegen {
     importMapping.put("LocalTime", "org.joda.time.*");
   }
 
+
+  public String generateExamplePath(String path, Operation operation) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(path);
+
+    if(operation.getParameters() != null) {
+      int count = 0;
+
+      for(Parameter param : operation.getParameters()) {
+        if(param instanceof QueryParameter) {
+          StringBuilder paramPart = new StringBuilder();
+          QueryParameter qp = (QueryParameter) param;
+
+          if(count == 0)
+            paramPart.append("?");
+          else
+            paramPart.append(",");
+          count += 1;
+          if(!param.getRequired())
+            paramPart.append("[");
+          paramPart.append(param.getName()).append("=");
+          paramPart.append("{");
+          if(qp.getCollectionFormat() != null) {
+            paramPart.append(param.getName() + "1");
+            if("csv".equals(qp.getCollectionFormat()))
+              paramPart.append(",");
+            else if("pipes".equals(qp.getCollectionFormat()))
+              paramPart.append("|");
+            else if("tsv".equals(qp.getCollectionFormat()))
+              paramPart.append("\t");
+            else if("multi".equals(qp.getCollectionFormat())) {
+              paramPart.append("&").append(param.getName()).append("=");
+              paramPart.append(param.getName() + "2");
+            }
+          }
+          else {
+            paramPart.append(param.getName());
+          }
+          paramPart.append("}");
+          if(!param.getRequired())
+            paramPart.append("]");
+          sb.append(paramPart.toString());
+        }
+      }
+    }
+
+    return sb.toString();
+  }
+
   public String toInstantiationType(Property p) {
     if (p instanceof MapProperty) {
       MapProperty ap = (MapProperty) p;
@@ -254,14 +356,34 @@ public class DefaultCodegen {
       return "null";
     else if(p instanceof DateTimeProperty)
       return "null";
-    else if (p instanceof DoubleProperty)
+    else if (p instanceof DoubleProperty) {
+      DoubleProperty dp = (DoubleProperty) p;
+      if(dp.getDefault() != null) {
+        return dp.getDefault().toString();
+      }
       return "null";
-    else if (p instanceof FloatProperty)
+    }
+    else if (p instanceof FloatProperty) {
+      FloatProperty dp = (FloatProperty) p;
+      if(dp.getDefault() != null) {
+        return dp.getDefault().toString();
+      }
       return "null";
-    else if (p instanceof IntegerProperty)
+    }
+    else if (p instanceof IntegerProperty) {
+      IntegerProperty dp = (IntegerProperty) p;
+      if(dp.getDefault() != null) {
+        return dp.getDefault().toString();
+      }
       return "null";
-    else if (p instanceof LongProperty)
+    }
+    else if (p instanceof LongProperty) {
+      LongProperty dp = (LongProperty) p;
+      if(dp.getDefault() != null) {
+        return dp.getDefault().toString();
+      }
       return "null";
+    }
     else if (p instanceof MapProperty) {
       MapProperty ap = (MapProperty) p;
       String inner = getSwaggerType(ap.getAdditionalProperties());
@@ -314,11 +436,11 @@ public class DefaultCodegen {
   }
 
   public String snakeCase(String name) {
-    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+      return (name.length() > 0) ? (Character.toLowerCase(name.charAt(0)) + name.substring(1)) : "";
   }
 
   public String initialCaps(String name) {
-    return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    return StringUtils.capitalize(name);
   }
 
   public String getTypeDeclaration(String name) {
@@ -358,117 +480,45 @@ public class DefaultCodegen {
       m.name = escapeReservedWord(name);
     else
       m.name = name;
-    m.description = model.getDescription();
+    m.description = escapeText(model.getDescription());
     m.classname = toModelName(name);
     m.classVarName = toVarName(name);
     m.modelJson = Json.pretty(model);
     m.externalDocs = model.getExternalDocs();
-    int count = 0;
     if(model instanceof ArrayModel) {
       ArrayModel am = (ArrayModel) model;
       ArrayProperty arrayProperty = new ArrayProperty(am.getItems());
-      CodegenProperty cp = fromProperty(name, arrayProperty);
-      if(cp.complexType != null && !defaultIncludes.contains(cp.complexType))
-        m.imports.add(cp.complexType);
-      m.parent = toInstantiationType(arrayProperty);
-      String containerType = cp.containerType;
-      if(instantiationTypes.containsKey(containerType))
-        m.imports.add(instantiationTypes.get(containerType));
-      if(typeMapping.containsKey(containerType)) {
-        containerType = typeMapping.get(containerType);
-        cp.containerType = containerType;
-        m.imports.add(containerType);
-      }
+      addParentContainer(m, name, arrayProperty);
     }
     else if (model instanceof RefModel) {
       // TODO
-    }
-    else {
+    } else if (model instanceof ComposedModel) {
+      final ComposedModel composed = (ComposedModel) model;
+      final RefModel parent = (RefModel) composed.getParent();
+      final String parentModel = toModelName(parent.getSimpleRef());
+      m.parent = parentModel;
+      addImport(m, parentModel);
+      final ModelImpl child = (ModelImpl) composed.getChild();
+      addVars(m, child.getProperties(), child.getRequired());
+    } else {
       ModelImpl impl = (ModelImpl) model;
       if(impl.getAdditionalProperties() != null) {
         MapProperty mapProperty = new MapProperty(impl.getAdditionalProperties());
-        CodegenProperty cp = fromProperty(name, mapProperty);
-        if(cp.complexType != null && !defaultIncludes.contains(cp.complexType))
-          m.imports.add(cp.complexType);
-        m.parent = toInstantiationType(mapProperty);
-        String containerType = cp.containerType;
-        if(instantiationTypes.containsKey(containerType))
-          m.imports.add(instantiationTypes.get(containerType));
-        if(typeMapping.containsKey(containerType)) {
-          containerType = typeMapping.get(containerType);
-          cp.containerType = containerType;
-          m.imports.add(containerType);
-        }
+        addParentContainer(m, name, mapProperty);
       }
-      m.hasRequiredVars = false;
-      if(impl.getProperties() != null && impl.getProperties().size() > 0) {
-        m.hasVars = true;
-        for(String key: impl.getProperties().keySet()) {
-          Property prop = impl.getProperties().get(key);
-
-          if(prop == null) {
-            LOGGER.warn("null property for " + key);
-          }
-          else {
-            CodegenProperty cp = fromProperty(key, prop);
-            cp.required = false;
-            if(impl.getRequired() != null) {
-              for(String req : impl.getRequired()) {
-                if(key.equals(req)) {
-                  cp.required = true;
-                  m.hasRequiredVars = true;
-                }
-              }
-            }
-            if(cp.isEnum)
-              m.hasEnums = true;
-
-            if(cp.complexType != null && !defaultIncludes.contains(cp.complexType)) {
-              m.imports.add(cp.complexType);
-            }
-            m.vars.add(cp);
-            count += 1;
-            if(count != impl.getProperties().keySet().size())
-              cp.hasMore = new Boolean(true);
-            if(cp.isContainer != null) {
-              String arrayImport = typeMapping.get("array");
-              if(arrayImport != null &&
-                !languageSpecificPrimitives.contains(arrayImport) && 
-                !defaultIncludes.contains(arrayImport))
-                m.imports.add(arrayImport);
-            }
-
-            if(cp.complexType != null &&
-              !languageSpecificPrimitives.contains(cp.complexType) && 
-              !defaultIncludes.contains(cp.complexType))
-              m.imports.add(cp.complexType);
-
-            if(cp.baseType != null &&
-              !languageSpecificPrimitives.contains(cp.baseType) && 
-              !defaultIncludes.contains(cp.baseType))
-              m.imports.add(cp.baseType);
-          }
-        }
-      }
-      else {
-        m.emptyVars = true;
-      }
+      addVars(m, impl.getProperties(), impl.getRequired());
     }
     return m;
   }
 
-    public static String getterAndSetterCapitalize(String name) {
-        if (name == null || name.length() == 0) {
-            return name;
-        }
-        if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-                Character.isLowerCase(name.charAt(0))){
-            return name;
-        }
-        char chars[] = name.toCharArray();
-        chars[0] = Character.toUpperCase(chars[0]);
-        return new String(chars);
+  public String getterAndSetterCapitalize(String name) {
+    if (name == null || name.length() == 0) {
+      return name;
     }
+
+    return camelize(toVarName(name));
+
+  }
 
   public CodegenProperty fromProperty(String name, Property p) {
     if(p == null) {
@@ -484,9 +534,9 @@ public class DefaultCodegen {
     property.setter = "set" + getterAndSetterCapitalize(name);
     property.example = p.getExample();
     property.defaultValue = toDefaultValue(p);
+    property.jsonSchema = Json.pretty(p);
 
     String type = getSwaggerType(p);
-
     if(p instanceof AbstractNumericProperty) {
       AbstractNumericProperty np = (AbstractNumericProperty) p;
       property.minimum = np.getMinimum();
@@ -501,7 +551,6 @@ public class DefaultCodegen {
       if(np.getMaximum() != null)
         allowableValues.put("max", np.getMaximum());
       property.allowableValues = allowableValues;
-
     }
 
     if(p instanceof StringProperty) {
@@ -567,13 +616,8 @@ public class DefaultCodegen {
         property.isPrimitiveType = true;
     }
     else {
-      property.isNotContainer = true;
-      if(languageSpecificPrimitives().contains(type))
-        property.isPrimitiveType = true;
-      else
-        property.complexType = property.baseType;
+        setNonArrayMapProperty(property, type);
     }
-
     // this can cause issues for clients which don't support enums
     if(property.isEnum) {
       property.datatypeWithEnum = getEnumDeclaration(property.name, p);
@@ -582,8 +626,15 @@ public class DefaultCodegen {
     else
       property.innerDatatypeWithEnum = property.datatypeWithEnum = property.datatype;
 
-
     return property;
+  }
+
+  protected void setNonArrayMapProperty(CodegenProperty property, String type) {
+    property.isNotContainer = true;
+    if (languageSpecificPrimitives().contains(type))
+      property.isPrimitiveType = true;
+    else
+      property.complexType = property.baseType;
   }
 
   private Response findMethodResponse(Map<String, Response> responses) {
@@ -601,7 +652,7 @@ public class DefaultCodegen {
     return responses.get(code);
   }
 
-  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation){
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
     CodegenOperation op = CodegenModelFactory.newInstance(CodegenModelType.OPERATION);
     Set<String> imports = new HashSet<String>();
 
@@ -629,6 +680,7 @@ public class DefaultCodegen {
       operationId = builder.toString();
       LOGGER.warn("generated operationId " + operationId);
     }
+    operationId = removeNonNameElementToCamelCase(operationId);
     op.path = path;
     op.operationId = toOperationId(operationId);
     op.summary = escapeText(operation.getSummary());
@@ -644,6 +696,8 @@ public class DefaultCodegen {
         count += 1;
         if (count < operation.getConsumes().size())
           mediaType.put("hasMore", "true");
+        else
+          mediaType.put("hasMore", null);
         c.add(mediaType);
       }
       op.consumes = c;
@@ -659,6 +713,8 @@ public class DefaultCodegen {
         count += 1;
         if (count < operation.getProduces().size())
           mediaType.put("hasMore", "true");
+        else
+          mediaType.put("hasMore", null);
         c.add(mediaType);
       }
       op.produces = c;
@@ -666,9 +722,7 @@ public class DefaultCodegen {
     }
 
     if (operation.getResponses() != null && !operation.getResponses().isEmpty()) {
-
       Response methodResponse = findMethodResponse(operation.getResponses());
-      CodegenResponse methodCodegenResponse = null;
 
       for (Map.Entry<String, Response> entry : operation.getResponses().entrySet()) {
         Response response = entry.getValue();
@@ -678,31 +732,47 @@ public class DefaultCodegen {
             !defaultIncludes.contains(r.baseType) &&
             !languageSpecificPrimitives.contains(r.baseType))
           imports.add(r.baseType);
-
-        if (response == methodResponse)
-          methodCodegenResponse = r;
+        r.isDefault = response == methodResponse;
         op.responses.add(r);
       }
       op.responses.get(op.responses.size() - 1).hasMore = false;
 
-      if (methodResponse != null) {
-        op.returnType = methodCodegenResponse.dataType;
-        op.returnBaseType = methodCodegenResponse.baseType;
-        op.returnSimpleType = methodCodegenResponse.simpleType;
-        op.returnTypeIsPrimitive = methodCodegenResponse.primitiveType;
-        op.returnContainer = methodCodegenResponse.containerType;
-        op.isListContainer = methodCodegenResponse.isListContainer;
-        op.isMapContainer = methodCodegenResponse.isMapContainer;
-        if (methodResponse.getSchema() != null) {
-          Property responseProperty = methodResponse.getSchema();
-          responseProperty.setRequired(true);
-          CodegenProperty cm = fromProperty("response", responseProperty);
-          op.examples = toExamples(methodResponse.getExamples());
-          op.defaultResponse = toDefaultValue(responseProperty);
-          addHeaders(methodResponse, op.responseHeaders);
-        }
+    if(methodResponse != null) {
+      if (methodResponse.getSchema() != null) {
+        CodegenProperty cm = fromProperty("response", methodResponse.getSchema());
 
+        Property responseProperty = methodResponse.getSchema();
+
+        if(responseProperty instanceof ArrayProperty) {
+          ArrayProperty ap = (ArrayProperty) responseProperty;
+          CodegenProperty innerProperty = fromProperty("response", ap.getItems());
+          op.returnBaseType = innerProperty.baseType;
+        }
+        else {
+          if(cm.complexType != null)
+            op.returnBaseType = cm.complexType;
+          else
+            op.returnBaseType = cm.baseType;
+        }
+        op.examples = new ExampleGenerator(definitions).generate(methodResponse.getExamples(), operation.getProduces(), responseProperty);
+        op.defaultResponse = toDefaultValue(responseProperty);
+        op.returnType = cm.datatype;
+        if(cm.isContainer != null) {
+          op.returnContainer = cm.containerType;
+          if("map".equals(cm.containerType))
+            op.isMapContainer = Boolean.TRUE;
+          else if ("list".equalsIgnoreCase(cm.containerType))
+            op.isListContainer = Boolean.TRUE;
+          else if ("array".equalsIgnoreCase(cm.containerType))
+            op.isListContainer = Boolean.TRUE;
+        }
+        else
+          op.returnSimpleType = true;
+        if (languageSpecificPrimitives().contains(op.returnBaseType) || op.returnBaseType == null)
+          op.returnTypeIsPrimitive = true;
       }
+      addHeaders(methodResponse, op.responseHeaders);
+    }
     }
 
     List<Parameter> parameters = operation.getParameters();
@@ -776,7 +846,8 @@ public class DefaultCodegen {
     if(!op.formParams.isEmpty())
       op.hasFormParams = true;
     // legacy support
-    op.nickname = operationId;
+    op.nickname = op.operationId;
+
 
     if(op.allParams.size() > 0) 
       op.hasParams = true;
@@ -794,6 +865,8 @@ public class DefaultCodegen {
     r.message = response.getDescription();
     r.schema = response.getSchema();
     r.examples = toExamples(response.getExamples());
+    r.jsonSchema = Json.pretty(response);
+    addHeaders(response, r.headers);
 
     if (r.schema != null) {
       Property responseProperty = response.getSchema();
@@ -834,8 +907,19 @@ public class DefaultCodegen {
   public CodegenParameter fromParameter(Parameter param, Set<String> imports) {
     CodegenParameter p = CodegenModelFactory.newInstance(CodegenModelType.PARAMETER);
     p.baseName = param.getName();
-    p.description = param.getDescription();
-    p.required = param.getRequired();
+    p.description = escapeText(param.getDescription());
+    if(param.getRequired())
+      p.required = param.getRequired();
+    p.jsonSchema = Json.pretty(param);
+
+    // move the defaultValue for headers, forms and params
+    if(param instanceof QueryParameter) {
+        p.defaultValue = ((QueryParameter)param).getDefaultValue();
+    } else if(param instanceof HeaderParameter) {
+    	p.defaultValue = ((HeaderParameter)param).getDefaultValue();
+    } else if(param instanceof FormParameter) {
+    	p.defaultValue = ((FormParameter)param).getDefaultValue();
+    }
 
     if(param instanceof SerializableParameter) {
       SerializableParameter qp = (SerializableParameter) param;
@@ -848,6 +932,19 @@ public class DefaultCodegen {
           inner = new StringProperty().description("//TODO automatically added by swagger-codegen");
         }
         property = new ArrayProperty(inner);
+        collectionFormat = qp.getCollectionFormat();
+        CodegenProperty pr = fromProperty("inner", inner);
+        p.baseType = pr.datatype;
+        p.isContainer = true;
+        imports.add(pr.baseType);
+      }
+      else if("object".equals(qp.getType())) {
+        Property inner = qp.getItems();
+        if(inner == null) {
+          LOGGER.warn("warning!  No inner type supplied for map parameter \"" + qp.getName() + "\", using String");
+          inner = new StringProperty().description("//TODO automatically added by swagger-codegen");
+        }
+        property = new MapProperty(inner);
         collectionFormat = qp.getCollectionFormat();
         CodegenProperty pr = fromProperty("inner", inner);
         p.baseType = pr.datatype;
@@ -944,30 +1041,43 @@ public class DefaultCodegen {
     if(schemes == null)
       return null;
 
-    List<CodegenSecurity> secs = new ArrayList<CodegenSecurity>();
-    for(Iterator entries = schemes.entrySet().iterator(); entries.hasNext(); ) {
-      Map.Entry<String, SecuritySchemeDefinition> entry = (Map.Entry<String, SecuritySchemeDefinition>) entries.next();
+    List<CodegenSecurity> secs = new ArrayList<CodegenSecurity>(schemes.size());
+    for (Iterator<Map.Entry<String, SecuritySchemeDefinition>> it = schemes.entrySet().iterator(); it.hasNext();) {
+      final Map.Entry<String, SecuritySchemeDefinition> entry = it.next();
+      final SecuritySchemeDefinition schemeDefinition = entry.getValue();
 
       CodegenSecurity sec = CodegenModelFactory.newInstance(CodegenModelType.SECURITY);
       sec.name = entry.getKey();
-      sec.type = entry.getValue().getType();
-      sec.hasMore = entries.hasNext();
+      sec.type = schemeDefinition.getType();
+
+      if (schemeDefinition instanceof ApiKeyAuthDefinition) {
+        final ApiKeyAuthDefinition apiKeyDefinition = (ApiKeyAuthDefinition) schemeDefinition;
+        sec.isBasic = sec.isOAuth = false;
+        sec.isApiKey = true;
+        sec.keyParamName = apiKeyDefinition.getName();
+        sec.isKeyInHeader = apiKeyDefinition.getIn() == In.HEADER;
+        sec.isKeyInQuery = !sec.isKeyInHeader;
+      } else {
+        sec.isKeyInHeader = sec.isKeyInQuery = sec.isApiKey = false;
+        sec.isBasic = schemeDefinition instanceof BasicAuthDefinition;
+        sec.isOAuth = !sec.isBasic;
+      }
+
+      sec.hasMore = it.hasNext();
       secs.add(sec);
     }
     return secs;
   }
 
-  protected List<Map<String, String>> toExamples(Map<String, String> examples) {
+  protected List<Map<String, Object>> toExamples(Map<String, Object> examples) {
     if(examples == null)
       return null;
 
-    List<Map<String, String>> output = new ArrayList<Map<String, String>>();
-    for(String key: examples.keySet()) {
-      String value = examples.get(key);
-
-      Map<String, String> kv = new HashMap<String, String>();
-      kv.put("contentType", key);
-      kv.put("example", value);
+    final List<Map<String, Object>> output = new ArrayList<Map<String, Object>>(examples.size());
+    for(Map.Entry<String, Object> entry : examples.entrySet()) {
+      final Map<String, Object> kv = new HashMap<String, Object>();
+      kv.put("contentType", entry.getKey());
+      kv.put("example", entry.getValue());
       output.add(kv);
     }
     return output;
@@ -1014,5 +1124,179 @@ public class DefaultCodegen {
     }
     opList.add(co);
     co.baseName = tag;    
+  }
+
+  private void addParentContainer(CodegenModel m, String name, Property property) {
+    final CodegenProperty tmp = fromProperty(name, property);
+    addImport(m, tmp.complexType);
+    m.parent = toInstantiationType(property);
+    final String containerType = tmp.containerType;
+    final String instantiationType = instantiationTypes.get(containerType);
+    if (instantiationType != null) {
+      addImport(m, instantiationType);
+    }
+    final String mappedType = typeMapping.get(containerType);
+    if (mappedType != null) {
+      addImport(m, mappedType);
+    }
+  }
+
+  private void addImport(CodegenModel m, String type) {
+    if (type != null && !languageSpecificPrimitives.contains(type) && !defaultIncludes.contains(type)) {
+      m.imports.add(type);
+    }
+  }
+
+  private void addVars(CodegenModel m, Map<String, Property> properties, Collection<String> required) {
+    if (properties != null && properties.size() > 0) {
+      m.hasVars = true;
+      m.hasEnums = false;
+      final int totalCount = properties.size();
+      final Set<String> mandatory = required == null ? Collections.<String> emptySet() : new HashSet<String>(required);
+      int count = 0;
+      for (Map.Entry<String, Property> entry : properties.entrySet()) {
+        final String key = entry.getKey();
+        final Property prop = entry.getValue();
+
+        if (prop == null) {
+          LOGGER.warn("null property for " + key);
+        } else {
+          final CodegenProperty cp = fromProperty(key, prop);
+          cp.required = mandatory.contains(key) ? true : null;
+          if(cp.required != null)
+            m.hasRequiredVars = true;
+          if (cp.isEnum) {
+            m.hasEnums = true;
+          }
+          count += 1;
+          if (count != totalCount)
+            cp.hasMore = true;
+          if (cp.isContainer != null) {
+            addImport(m, typeMapping.get("array"));
+          }
+          addImport(m, cp.baseType);
+          addImport(m, cp.complexType);
+          m.vars.add(cp);
+        }
+      }
+    } else {
+      m.emptyVars = true;
+    }
+  }
+
+  /* underscore and camelize are copied from Twitter elephant bird
+   * https://github.com/twitter/elephant-bird/blob/master/core/src/main/java/com/twitter/elephantbird/util/Strings.java
+   */
+
+  /**
+   * Underscore the given word.
+   * @param word The word
+   * @return The underscored version of the word
+   */
+  public static String underscore(String word) {
+    String firstPattern = "([A-Z]+)([A-Z][a-z])";
+    String secondPattern = "([a-z\\d])([A-Z])";
+    String replacementPattern = "$1_$2";
+    // Replace package separator with slash.
+    word = word.replaceAll("\\.", "/");
+    // Replace $ with two underscores for inner classes.
+    word = word.replaceAll("\\$", "__");
+    // Replace capital letter with _ plus lowercase letter.
+    word = word.replaceAll(firstPattern, replacementPattern);
+    word = word.replaceAll(secondPattern, replacementPattern);
+    word = word.replace('-', '_');
+    word = word.toLowerCase();
+    return word;
+  }
+
+  /**
+   * Remove characters not suitable for variable or method name from the input and camelize it
+   * @param name
+   * @return
+   */
+  public String removeNonNameElementToCamelCase(String name) {
+    String nonNameElementPattern = "[-_:;#]";
+    name = StringUtils.join(Lists.transform(Lists.newArrayList(name.split(nonNameElementPattern)), new Function<String, String>() {
+      @Nullable
+      @Override
+      public String apply(String input) {
+        return StringUtils.capitalize(input);
+      }
+    }), "");
+    if (name.length() > 0) {
+      name = name.substring(0, 1).toLowerCase() + name.substring(1);
+    }
+    return name;
+  }
+
+  public static String camelize(String word) {
+    return camelize(word, false);
+  }
+
+  public static String camelize(String word, boolean lowercaseFirstLetter) {
+    // Replace all slashes with dots (package separator)
+    Pattern p = Pattern.compile("\\/(.?)");
+    Matcher m = p.matcher(word);
+    while (m.find()) {
+      word = m.replaceFirst("." + m.group(1)/*.toUpperCase()*/);
+      m = p.matcher(word);
+    }
+
+    // case out dots
+    String[] parts = word.split("\\.");
+    StringBuilder f = new StringBuilder();
+    for(String z : parts) {
+      if(z.length() > 0)
+        f.append(Character.toUpperCase(z.charAt(0))).append(z.substring(1));
+    }
+    word = f.toString();
+
+    m = p.matcher(word);
+    while (m.find()) {
+      word = m.replaceFirst("" + Character.toUpperCase(m.group(1).charAt(0)) + m.group(1).substring(1)/*.toUpperCase()*/);
+      m = p.matcher(word);
+    }
+
+    // Uppercase the class name.
+    p = Pattern.compile("(\\.?)(\\w)([^\\.]*)$");
+    m = p.matcher(word);
+    if (m.find()) {
+      String rep = m.group(1) + m.group(2).toUpperCase() + m.group(3);
+      rep = rep.replaceAll("\\$", "\\\\\\$");
+      word = m.replaceAll(rep);
+    }
+
+    // Replace two underscores with $ to support inner classes.
+    p = Pattern.compile("(__)(.)");
+    m = p.matcher(word);
+    while (m.find()) {
+      word = m.replaceFirst("\\$" + m.group(2).toUpperCase());
+      m = p.matcher(word);
+    }
+
+    // Remove all underscores
+    p = Pattern.compile("(_)(.)");
+    m = p.matcher(word);
+    while (m.find()) {
+      word = m.replaceFirst(m.group(2).toUpperCase());
+      m = p.matcher(word);
+    }
+
+    if (lowercaseFirstLetter) {
+      word = word.substring(0, 1).toLowerCase() + word.substring(1);
+    }
+
+    return word;
+  }
+
+
+  public String apiFilename(String templateName, String tag)
+  {
+    String suffix = apiTemplateFiles().get(templateName);
+    return apiFileFolder() + File.separator + toApiFilename(tag) + suffix;
+  }
+
+  public boolean shouldOverwrite( String filename ){
+    return true;
   }
 }

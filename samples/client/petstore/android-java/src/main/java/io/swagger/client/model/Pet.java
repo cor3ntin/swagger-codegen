@@ -5,27 +5,32 @@ import io.swagger.client.model.Tag;
 import java.util.*;
 
 import com.wordnik.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 
 @ApiModel(description = "")
 public class Pet  {
   
+  @SerializedName("id")
   private Long id = null;
+  @SerializedName("category")
   private Category category = null;
+  @SerializedName("name")
   private String name = null;
+  @SerializedName("photoUrls")
   private List<String> photoUrls = new ArrayList<String>() ;
+  @SerializedName("tags")
   private List<Tag> tags = new ArrayList<Tag>() ;
   public enum StatusEnum {
      available,  pending,  sold, 
   };
+  @SerializedName("status")
   private StatusEnum status = null;
 
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("id")
+  @ApiModelProperty(value = "")
   public Long getId() {
     return id;
   }
@@ -36,8 +41,7 @@ public class Pet  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("category")
+  @ApiModelProperty(value = "")
   public Category getCategory() {
     return category;
   }
@@ -49,7 +53,6 @@ public class Pet  {
   /**
    **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("name")
   public String getName() {
     return name;
   }
@@ -61,7 +64,6 @@ public class Pet  {
   /**
    **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("photoUrls")
   public List<String> getPhotoUrls() {
     return photoUrls;
   }
@@ -72,8 +74,7 @@ public class Pet  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("tags")
+  @ApiModelProperty(value = "")
   public List<Tag> getTags() {
     return tags;
   }
@@ -85,8 +86,7 @@ public class Pet  {
   /**
    * pet status in the store
    **/
-  @ApiModelProperty(required = false, value = "pet status in the store")
-  @JsonProperty("status")
+  @ApiModelProperty(value = "pet status in the store")
   public StatusEnum getStatus() {
     return status;
   }

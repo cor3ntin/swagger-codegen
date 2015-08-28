@@ -279,9 +279,6 @@ Sender<responses::updatePetRequest> updatePet (AbstractApiInvoker* invoker,
     };
     QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
-
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -296,7 +293,6 @@ Sender<responses::updatePetRequest> updatePet (AbstractApiInvoker* invoker,
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -326,9 +322,6 @@ Sender<responses::addPetRequest> addPet (AbstractApiInvoker* invoker,
     };
     QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
-
-    
-
     if(body) { 
         auto bodyVar = * body;
         if(contentType == QLatin1String("application/x-www-form-urlencoded")) {
@@ -343,7 +336,6 @@ Sender<responses::addPetRequest> addPet (AbstractApiInvoker* invoker,
                 http_body = QJsonDocument(jsonValue.toObject()).toJson(QJsonDocument::Compact);
         }
     }
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -371,9 +363,6 @@ Sender<responses::findPetsByStatusRequest> findPetsByStatus (AbstractApiInvoker*
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -401,9 +390,6 @@ Sender<responses::findPetsByTagsRequest> findPetsByTags (AbstractApiInvoker* inv
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -431,9 +417,6 @@ Sender<responses::getPetByIdRequest> getPetById (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -466,10 +449,6 @@ Sender<responses::updatePetWithFormRequest> updatePetWithForm (AbstractApiInvoke
     };
     QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
-
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {
@@ -509,9 +488,6 @@ Sender<responses::deletePetRequest> deletePet (AbstractApiInvoker* invoker,
 
     QString contentType(QLatin1String("application/json"));
 
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
 
@@ -544,10 +520,6 @@ Sender<responses::uploadFileRequest> uploadFile (AbstractApiInvoker* invoker,
     };
     QString contentType = !contentTypes.isEmpty() ? contentTypes.first() : QLatin1String("application/json");
 
-
-    
-
-    
 
     QHttpMultiPart* parts = nullptr;
     if(contentType.startsWith(QLatin1String("multipart/form-data"))) {

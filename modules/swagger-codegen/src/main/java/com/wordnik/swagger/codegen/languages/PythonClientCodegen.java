@@ -4,9 +4,12 @@ import com.wordnik.swagger.codegen.*;
 import com.wordnik.swagger.models.properties.*;
 
 import java.io.File;
+import java.util.*;
 
 public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig {
-  String module = "client";
+  protected String module = "SwaggerPetstore";
+  protected String invokerPackage;
+  protected String eggPackage;
 
   public CodegenType getTag() {
     return CodegenType.CLIENT;
@@ -22,18 +25,21 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
 
   public PythonClientCodegen() {
     super();
+
+    eggPackage = module + "-python";
+    invokerPackage = eggPackage + "/" + module;
+
     outputFolder = "generated-code/python";
     modelTemplateFiles.put("model.mustache", ".py");
     apiTemplateFiles.put("api.mustache", ".py");
     templateDir = "python";
-    
-    apiPackage = module;
-    modelPackage = module + ".models";
-    
+
+    apiPackage = invokerPackage + ".apis";
+    modelPackage = invokerPackage + ".models";
+
     languageSpecificPrimitives.clear();
     languageSpecificPrimitives.add("int");
     languageSpecificPrimitives.add("float");
-    languageSpecificPrimitives.add("long");
     languageSpecificPrimitives.add("list");
     languageSpecificPrimitives.add("bool");
     languageSpecificPrimitives.add("str");
@@ -42,7 +48,7 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
     typeMapping.clear();
     typeMapping.put("integer", "int");
     typeMapping.put("float", "float");
-    typeMapping.put("long", "long");
+    typeMapping.put("long", "int");
     typeMapping.put("double", "float");
     typeMapping.put("array", "list");
     typeMapping.put("map", "map");
@@ -50,11 +56,24 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
     typeMapping.put("string", "str");
     typeMapping.put("date", "datetime");
 
-    
-    supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
-    supportingFiles.add(new SupportingFile("swagger.mustache", module, "swagger.py"));
-    supportingFiles.add(new SupportingFile("__init__.mustache", module, "__init__.py"));
-    supportingFiles.add(new SupportingFile("__init__.mustache", modelPackage.replace('.', File.separatorChar), "__init__.py"));
+    // from https://docs.python.org/release/2.5.4/ref/keywords.html
+    reservedWords = new HashSet<String> (
+      Arrays.asList(
+        "and", "del", "from", "not", "while", "as", "elif", "global", "or", "with",
+        "assert", "else", "if", "pass", "yield", "break", "except", "import",
+        "print", "class", "exec", "in", "raise", "continue", "finally", "is",
+        "return", "def", "for", "lambda", "try"));
+
+    additionalProperties.put("module", module);
+
+    supportingFiles.add(new SupportingFile("README.mustache", eggPackage, "README.md"));
+    supportingFiles.add(new SupportingFile("setup.mustache", eggPackage, "setup.py"));
+    supportingFiles.add(new SupportingFile("swagger.mustache", invokerPackage, "swagger.py"));
+    supportingFiles.add(new SupportingFile("rest.mustache", invokerPackage, "rest.py"));
+    supportingFiles.add(new SupportingFile("util.mustache", invokerPackage, "util.py"));
+    supportingFiles.add(new SupportingFile("__init__package.mustache", invokerPackage, "__init__.py"));
+    supportingFiles.add(new SupportingFile("__init__model.mustache", modelPackage.replace('.', File.separatorChar), "__init__.py"));
+    supportingFiles.add(new SupportingFile("__init__api.mustache", apiPackage.replace('.', File.separatorChar), "__init__.py"));
   }
 
   @Override
@@ -96,14 +115,100 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
       if(languageSpecificPrimitives.contains(type)) {
         return type;
       }
+    } else {
+      type = toModelName(swaggerType);
     }
-    else
-      type = swaggerType;
     return type;
   }
 
   public String toDefaultValue(Property p) {
 	// TODO: Support Python def value
     return "null";
-  }	
+  }
+
+  @Override
+  public String toVarName(String name) {
+    // replace - with _ e.g. created-at => created_at
+    name = name.replaceAll("-", "_");
+
+    // if it's all uppper case, convert to lower case
+    if (name.matches("^[A-Z_]*$"))
+      name = name.toLowerCase();
+
+    // underscore the variable name
+    // petId => pet_id
+    name = underscore(dropDots(name));
+
+    // for reserved word or word starting with number, append _
+    if(reservedWords.contains(name) || name.matches("^\\d.*"))
+      name = escapeReservedWord(name);
+
+    return name;
+  }
+
+  private static String dropDots(String str) {
+    return str.replaceAll("\\.", "_");
+  }
+
+  @Override
+  public String toParamName(String name) {
+    // should be the same as variable name
+    return toVarName(name);
+  }
+
+  @Override
+  public String toModelName(String name) {
+    // model name cannot use reserved keyword, e.g. return
+    if(reservedWords.contains(name))
+      throw new RuntimeException(name + " (reserved word) cannot be used as a model name");
+
+    // camelize the model name
+    // phone_number => PhoneNumber
+    return camelize(name);
+  }
+
+  @Override
+  public String toModelFilename(String name) {
+    // model name cannot use reserved keyword, e.g. return
+    if(reservedWords.contains(name))
+      throw new RuntimeException(name + " (reserved word) cannot be used as a model name");
+
+    // underscore the model file name
+    // PhoneNumber => phone_number
+    return underscore(dropDots(name));
+  }
+
+  @Override
+  public String toApiFilename(String name) {
+    // replace - with _ e.g. created-at => created_at
+    name = name.replaceAll("-", "_");
+
+    // e.g. PhoneNumberApi.rb => phone_number_api.rb
+    return underscore(name) + "_api";
+  }
+
+  @Override
+  public String toApiName(String name) {
+    if(name.length() == 0)
+      return "DefaultApi";
+    // e.g. phone_number_api => PhoneNumberApi
+    return camelize(name) + "Api";
+  }
+
+  @Override
+  public String toApiVarName(String name) {
+      if(name.length() == 0)
+          return "default_api";
+    return underscore(name) + "_api";
+  }
+
+  @Override
+  public String toOperationId(String operationId) {
+    // method name cannot use reserved keyword, e.g. return
+    if(reservedWords.contains(operationId))
+      throw new RuntimeException(operationId + " (reserved word) cannot be used as method name");
+
+    return underscore(operationId);
+  }
+
 }

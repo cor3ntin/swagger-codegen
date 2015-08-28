@@ -34,16 +34,22 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
     templateDir = "objc";
     modelPackage = "";
 
-    additionalProperties.put("projectName", "swaggerClient");
+    String appName = System.getProperty("appName");
+    if(appName == null) {
+      appName = "swaggerClient";
+    }
+    additionalProperties.put("projectName", appName);
 
     defaultIncludes = new HashSet<String>(
       Arrays.asList(
         "bool",
+        "BOOL",
         "int",
         "NSString",
         "NSObject", 
         "NSArray",
         "NSNumber",
+        "NSDate",
         "NSDictionary",
         "NSMutableArray",
         "NSMutableDictionary")
@@ -53,23 +59,33 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
         "NSNumber",
         "NSString",
         "NSObject",
-        "bool")
+        "NSDate",
+        "bool",
+        "BOOL")
       );
 
+    // ref: http://www.tutorialspoint.com/objective_c/objective_c_basic_syntax.htm
     reservedWords = new HashSet<String>(
       Arrays.asList(
-        "void", "char", "short", "int", "void", "char", "short", "int",
-        "long", "float", "double", "signed", "unsigned", "id", "const",
-        "volatile", "in", "out", "inout", "bycopy", "byref", "oneway",
-        "self", "super", "description"
+              "auto",     "else",              "long",      "switch",
+              "break",    "enum",              "register",  "typedef",
+              "case",     "extern",            "return",    "union",
+              "char",     "float",             "short",     "unsigned",
+              "const",    "for",               "signed",    "void",
+              "continue", "goto",              "sizeof",    "volatile",
+              "default",  "if", "id",          "static",    "while",
+              "do",       "int",               "struct",    "_Packed",
+              "double",   "protocol",          "interface", "implementation",
+              "NSObject", "NSInteger",         "NSNumber",  "CGFloat",
+              "property", "nonatomic",         "retain",    "strong",
+              "weak",     "unsafe_unretained", "readwrite", "readonly"
       ));
 
     typeMapping = new HashMap<String, String>();
     typeMapping.put("enum", "NSString");
-    typeMapping.put("Date", "SWGDate");
-    typeMapping.put("DateTime", "SWGDate");
-    // typeMapping.put("Date", "SWGDate");
-    typeMapping.put("boolean", "NSNumber");
+    typeMapping.put("Date", "NSDate");
+    typeMapping.put("DateTime", "NSDate");
+    typeMapping.put("boolean", "BOOL");
     typeMapping.put("string", "NSString");
     typeMapping.put("integer", "NSNumber");
     typeMapping.put("int", "NSNumber");
@@ -83,13 +99,13 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
     typeMapping.put("object", "NSObject");
 
     importMapping = new HashMap<String, String> ();
-    importMapping.put("Date", "SWGDate");
 
     foundationClasses = new HashSet<String> (
       Arrays.asList(
         "NSNumber",
         "NSObject",
         "NSString",
+        "NSDate",
         "NSDictionary")
       );
 
@@ -98,12 +114,14 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
 
     supportingFiles.add(new SupportingFile("SWGObject.h", sourceFolder, "SWGObject.h"));
     supportingFiles.add(new SupportingFile("SWGObject.m", sourceFolder, "SWGObject.m"));
+    supportingFiles.add(new SupportingFile("SWGQueryParamCollection.h", sourceFolder, "SWGQueryParamCollection.h"));
+    supportingFiles.add(new SupportingFile("SWGQueryParamCollection.m", sourceFolder, "SWGQueryParamCollection.m"));
     supportingFiles.add(new SupportingFile("SWGApiClient.h", sourceFolder, "SWGApiClient.h"));
     supportingFiles.add(new SupportingFile("SWGApiClient.m", sourceFolder, "SWGApiClient.m"));
     supportingFiles.add(new SupportingFile("SWGFile.h", sourceFolder, "SWGFile.h"));
     supportingFiles.add(new SupportingFile("SWGFile.m", sourceFolder, "SWGFile.m"));
-    supportingFiles.add(new SupportingFile("SWGDate.h", sourceFolder, "SWGDate.h"));
-    supportingFiles.add(new SupportingFile("SWGDate.m", sourceFolder, "SWGDate.m"));
+    supportingFiles.add(new SupportingFile("JSONValueTransformer+ISO8601.m", sourceFolder, "JSONValueTransformer+ISO8601.m"));
+    supportingFiles.add(new SupportingFile("JSONValueTransformer+ISO8601.h", sourceFolder, "JSONValueTransformer+ISO8601.h"));
     supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
   }
 
@@ -147,28 +165,83 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String getTypeDeclaration(Property p) {
-    String swaggerType = getSwaggerType(p);
-    if(languageSpecificPrimitives.contains(swaggerType) && !foundationClasses.contains(swaggerType))
-      return toModelName(swaggerType);
-    else
-      return swaggerType + "*";
+      if (p instanceof ArrayProperty) {
+          ArrayProperty ap = (ArrayProperty) p;
+          Property inner = ap.getItems();
+          String innerType = getSwaggerType(inner);
+
+          // In this codition, type of property p is array of primitive,
+          // return container type with pointer, e.g. `NSArray*'
+          if (languageSpecificPrimitives.contains(innerType))
+              return getSwaggerType(p) + "*";
+
+          // In this codition, type of property p is array of model,
+          // return container type combine inner type with pointer, e.g. `NSArray<SWGTag>*'
+          String innerTypeDeclaration = getTypeDeclaration(inner);
+        
+          if (innerTypeDeclaration.endsWith("*"))
+              innerTypeDeclaration = innerTypeDeclaration.substring(0, innerTypeDeclaration.length() - 1);
+        
+          return getSwaggerType(p) + "<" + innerTypeDeclaration + ">*";
+      }
+      else {
+          String swaggerType = getSwaggerType(p);
+
+          // In this codition, type of p is objective-c primitive type, e.g. `NSSNumber',
+          // return type of p with pointer, e.g. `NSNumber*'
+          if (languageSpecificPrimitives.contains(swaggerType) &&
+              foundationClasses.contains(swaggerType)) {
+              return swaggerType + "*";
+          }
+          // In this codition, type of p is c primitive type, e.g. `bool',
+          // return type of p, e.g. `bool'
+          else if (languageSpecificPrimitives.contains(swaggerType)) {
+              return swaggerType;
+          }
+          // In this codition, type of p is objective-c object type, e.g. `SWGPet',
+          // return type of p with pointer, e.g. `SWGPet*'
+          else {
+              return swaggerType + "*";
+          }
+      }
   }
 
   @Override
   public String toModelName(String type) {
+    type = type.replaceAll("[^0-9a-zA-Z_]", "_");
+
+    // language build-in classes
     if(typeMapping.keySet().contains(type) ||
       foundationClasses.contains(type) ||
       importMapping.values().contains(type) ||
       defaultIncludes.contains(type) ||
       languageSpecificPrimitives.contains(type)) {
-      return Character.toUpperCase(type.charAt(0)) + type.substring(1);
+      return camelize(type);
     }
+    // custom classes
     else {
-      return PREFIX + Character.toUpperCase(type.charAt(0)) + type.substring(1);
+      return PREFIX + camelize(type);
     }
   }
 
   @Override
+  public String toModelFilename(String name) {
+    // should be the same as the model name
+    return toModelName(name);
+  }
+
+    @Override
+    protected void setNonArrayMapProperty(CodegenProperty property, String type) {
+        super.setNonArrayMapProperty(property, type);
+        if("NSDictionary".equals(type)) {
+            property.setter = "initWithDictionary";
+        }
+        else {
+            property.setter = "initWithValues";
+        }
+    }
+
+    @Override
   public String toModelImport(String name) {
     if("".equals(modelPackage()))
       return name;
@@ -192,30 +265,52 @@ public class ObjcClientCodegen extends DefaultCodegen implements CodegenConfig {
   }
 
   @Override
-  public String toModelFilename(String name) {
-    return PREFIX + initialCaps(name);
-  }
-
-  @Override
   public String toApiName(String name) {
-    return PREFIX + initialCaps(name) + "Api";
+    return PREFIX + camelize(name) + "Api";
   }
 
   public String toApiFilename(String name) {
-    return PREFIX + initialCaps(name) + "Api";
+    return PREFIX + camelize(name) + "Api";
   }
 
   @Override
   public String toVarName(String name) {
-    String paramName = name.replaceAll("[^a-zA-Z0-9_]","");
-    if(paramName.startsWith("new") || reservedWords.contains(paramName)) {
-      return escapeReservedWord(paramName);
-    }
-    else
-      return paramName;
+    // replace non-word characters to `_`
+    // e.g. `created-at` to `created_at`
+    name = name.replaceAll("[^a-zA-Z0-9_]","_");
+
+    // if it's all upper case, do noting
+    if (name.matches("^[A-Z_]$"))
+      return name;
+
+    // camelize (lower first character) the variable name
+    // e.g. `pet_id` to `petId`
+    name = camelize(name, true);
+
+    // for reserved word or word starting with number, prepend `_`
+    if (reservedWords.contains(name) || name.matches("^\\d.*"))
+      name = escapeReservedWord(name);
+
+    return name;
+  }
+  
+  @Override
+  public String toParamName(String name) {
+    // should be the same as variable name
+    return toVarName(name);
   }
 
   public String escapeReservedWord(String name) {
     return "_" + name;
   }
+
+  @Override
+  public String toOperationId(String operationId) {
+    // method name cannot use reserved keyword, e.g. return
+    if(reservedWords.contains(operationId))
+      throw new RuntimeException(operationId + " (reserved word) cannot be used as method name");
+
+    return camelize(operationId, true);
+  }
+
 }

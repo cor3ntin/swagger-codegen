@@ -2,20 +2,21 @@ package io.swagger.client.model;
 
 
 import com.wordnik.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 
 @ApiModel(description = "")
 public class Category  {
   
+  @SerializedName("id")
   private Long id = null;
+  @SerializedName("name")
   private String name = null;
 
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("id")
+  @ApiModelProperty(value = "")
   public Long getId() {
     return id;
   }
@@ -26,8 +27,7 @@ public class Category  {
   
   /**
    **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("name")
+  @ApiModelProperty(value = "")
   public String getName() {
     return name;
   }

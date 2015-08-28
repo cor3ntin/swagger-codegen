@@ -15,7 +15,11 @@ public class CodegenProperty {
   /** A free-form property to include an example of an instance for this schema. */
   public String example;
 
-  public Double minimum, maximum, exclusiveMinimum, exclusiveMaximum;
+  public String jsonSchema;
+  public Double minimum;
+  public Double maximum;
+  public Boolean exclusiveMinimum;
+  public Boolean exclusiveMaximum;
   public Boolean hasMore = null, required = null, secondaryParam = null;
   public Boolean isPrimitiveType, isContainer, isNotContainer;
   public boolean isEnum;

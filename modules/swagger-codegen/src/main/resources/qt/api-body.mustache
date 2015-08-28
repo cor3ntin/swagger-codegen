@@ -16,11 +16,11 @@ namespace {{classname}} {
 namespace responses {
 
 {{#operation}}
-{{nickname}}Request::{{nickname}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+{{operationId}}Request::{{operationId}}Request(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
     : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {
 }
 
-AbstractRequest::Error {{nickname}}Request::processResponse(int status, const QJsonValue & data) {
+AbstractRequest::Error {{operationId}}Request::processResponse(int status, const QJsonValue & data) {
     Q_UNUSED(data);
 
     int callbackId = status;
@@ -60,7 +60,7 @@ namespace operations {
 
 
 
-Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker{{#hasParams}},
+Sender<responses::{{operationId}}Request> {{operationId}} (AbstractApiInvoker* invoker{{#hasParams}},
         {{/hasParams}}{{#allParams}}{{^isFile}}{{^required}}boost::optional<{{{dataType}}}>{{/required}}{{#required}}{{^isPrimitiveType}}const {{/isPrimitiveType}}{{{dataType}}}{{^isPrimitiveType}}&{{/isPrimitiveType}}{{/required}}{{/isFile}}{{#isFile}}{{{dataType}}}{{/isFile}} {{paramName}}{{#hasMore}},
         {{/hasMore}}{{/allParams}}) {
 
@@ -91,7 +91,7 @@ Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker
             {{#isPrimitiveType}}
             formParams.addQueryItem("{{paramName}}", to_query_value(bodyVar));
             {{/isPrimitiveType}}{{^isPrimitiveType}}
-            Q_ASSERT_X(false, "{{classname}}::{{nickname}}", "{{{dataType}}} {{paramName}} is not url encodable");{{/isPrimitiveType}}
+            Q_ASSERT_X(false, "{{classname}}::{{operationId}}", "{{{dataType}}} {{paramName}} is not url encodable");{{/isPrimitiveType}}
         }
         else {
             auto jsonValue = swagger::serialize(bodyVar);
@@ -113,7 +113,7 @@ Sender<responses::{{nickname}}Request> {{nickname}} (AbstractApiInvoker* invoker
     }{{/hasFormParams}}
 
     auto params = invoker->prepare(path, http_method, queryParams, headers, formParams, parts, contentType, http_body {{#bodyParam}}{{#isFile}},{{paramName}}{{/isFile}}{{/bodyParam}});
-    auto request = new {{nickname}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
+    auto request = new {{operationId}}Request(std::move(params), invoker, QStringList{ {{#authMethods}}"{{name}}"{{#hasMore}},{{/hasMore}}{{/authMethods}} }  );
     return request;
 }
 {{/operation}}

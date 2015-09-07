@@ -37,7 +37,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     apiTemplateFiles.put("api-header.mustache", "_p.h");
     templateDir = "qt";
     modelPackage = "";
-
+    
     defaultIncludes = new HashSet<String>();
     languageSpecificPrimitives = new HashSet<String>(
         Arrays.asList(
@@ -45,7 +45,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
             "int",
             "long", "double", "float",
             "qint8", "qint16", "qint32", "qint64",
-            "quint8", "quint16", "quint32", "quint64"
+            "quint8", "quint16", "quint32", "quint64", "Dict"
         )
     );
 
@@ -73,7 +73,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
     typeMapping.put("double", "double");
     typeMapping.put("number", "double");
     typeMapping.put("array", "QVector");
-    typeMapping.put("map", "QHash");
+    typeMapping.put("map", "Dict");
     typeMapping.put("file", "QIODevice*");
 
     QtClasses = new HashSet<String>(
@@ -133,7 +133,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
       MapProperty mp = (MapProperty) p;
       Property inner = mp.getAdditionalProperties();
 
-      return getSwaggerType(p) + "<QString, " + getTypeDeclaration(inner) + ">";
+      return getSwaggerType(p) + "<" + getTypeDeclaration(inner) + ">";
     }
     return super.getTypeDeclaration(p);
   }
@@ -145,7 +145,7 @@ public class QtClientCodegen extends DefaultCodegen implements CodegenConfig {
       return "QVector<" + type + ">";
     }
     if(container instanceof MapProperty) {
-      return "QHash<QString, " + type + ">";
+      return "Dict<" + type + ">";
     }
     return type;
   }

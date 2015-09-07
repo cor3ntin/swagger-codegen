@@ -5,6 +5,7 @@
 
 #include "SwaggerUtils.h"
 #include <QStringList> //fixme
+#include <QObject>
 
 class QJsonObject;
 
@@ -41,6 +42,15 @@ private:
 {{#vars}}    {{{datatypeWithEnum}}} m_{{name}};
 {{/vars}}
 };
+
+#ifdef QT_QML_LIB
+class {{classname}}_QML : public QObject, public {{classname}} {
+    Q_OBJECT
+    {{#vars}}
+    Q_PROPERTY({{{datatypeWithEnum}}} {{name}} READ {{getter}} WRITE {{setter}})
+    {{/vars}}
+};
+#endif
 
 
 SWAGGER_DECLARE_MODEL({{classname}});

@@ -1,5 +1,9 @@
 #include "SwaggerUtils.h"
 
 namespace swagger {
+    ApiDict & apis_register() {
+        static ApiDict dict;
+        return dict;
+    }
     Q_LOGGING_CATEGORY(swagger_lc, "Swagger");
 }

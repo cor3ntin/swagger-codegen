@@ -64,6 +64,17 @@ private:
     bool m_autoDelete;
 };
 
+class QmlRequest : public AbstractRequest {
+    Q_OBJECT
+public:
+    QmlRequest(AbstractApiInvoker::RequestParams && params, AbstractApiInvoker* invoker, QStringList && authSchemes)
+        : AbstractRequest(std::move(params), invoker, std::move(authSchemes)) {}
+
+    AbstractRequest::Error processResponse(int status, const QJsonValue & data);
+Q_SIGNALS:
+    void finished(int status, QVariant data);
+};
+
 }
 
 

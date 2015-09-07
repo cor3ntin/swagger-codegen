@@ -83,7 +83,27 @@ private:
 {{/operations}}
 
 } //namespace {{classname}}
+
+#ifdef QT_QML_LIB
+class {{classname}}_QML : public QObject {
+    Q_OBJECT
+protected:
+    Q_INVOKABLE {{classname}}_QML() = default;
+public:
+    Q_INVOKABLE {{classname}}_QML(AbstractApiInvoker* invoker)
+        : m_invoker(invoker) {}
+{{#operations}}
+        {{#operation}}
+        Q_INVOKABLE QObject* {{operationId}}({{#allParams}}{{^isFile}} const QVariant{{#isContainer}}List{{/isContainer}} & {{paramName}}{{/isFile}}{{#hasMore}},
+        {{/hasMore}}{{/allParams}});
+        {{/operation}}
 {{/operations}}
+private:
+    AbstractApiInvoker* m_invoker = nullptr;
+};
+#endif
+{{/operations}}
+
 
 } //namespace swagger
 

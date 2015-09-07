@@ -13,11 +13,20 @@
 #include <QVariant>
 #include <QLoggingCategory>
 #include <QMimeDatabase>
+#include <QHash>
+#ifdef QT_QML_LIB
+#include <QtQml>
+#endif
 class QIODevice;
 
 namespace swagger {
 
+template<class T> using Dict = QHash<QString, T>;
+
 Q_DECLARE_LOGGING_CATEGORY(swagger_lc);
+
+using ApiDict = QHash<QString, QMetaObject>;
+ApiDict & apis_register();
 
 #define logSwaggerError(...) qCCritical(swagger_lc, __VA_ARGS__)
 #define logSwaggerWarning(...) qCWarning(swagger_lc, __VA_ARGS__)
@@ -28,6 +37,15 @@ inline QString to_query_value(const T & t) { return QVariant::fromValue<T>(t).to
 
 template <>
 inline QString to_query_value(const QString & t) { return t;}
+
+template <>
+inline QString to_query_value(const QVariant & t) { return t.toString();}
+inline QString to_query_value(const QVariantList &) { return "";}
+
+
+inline bool isNotNull(const QVariant & v) { return !v.isNull(); }
+inline bool isNotNull(const QVariantList & v) { return !v.isEmpty(); }
+inline bool isNotNull(const QVariantMap & v) { return !v.isEmpty(); }
 
 template <typename T>
 void set_form_data(QHttpMultiPart* & parts, const QString & k, T value) {
@@ -416,8 +434,29 @@ struct is_enum<o::e> : std::true_type {\
 
 #define SWAGGER_REGISTER_ENUM(o,e) const char* const swagger::is_enum<o::e>::name = #e;                                                                                               \
 
+#ifdef QT_QML_LIB
 
 
+#if defined(Q_CC_GNU)
+#   define SWAGGER_UNUSED __attribute__((unused))
+#else
+#   define SWAGGER_UNUSED
+#endif
+
+#if defined(Q_CC_MSVC)
+#   define SWAGGER_VISIBILITY Q_DECL_EXPORT
+#else
+#   define SWAGGER_VISIBILITY
+#endif
+
+#define SWAGGER_REGISTER_QML_ENTITY(C) SWAGGER_VISIBILITY SWAGGER_UNUSED static const char swagger_register_##C ##_i = []() {\
+     qmlRegisterType<C##_QML>("com.swagger.models", 1, 0, #C ); return 0; }();
+#define SWAGGER_REGISTER_QML_API(C)  \
+    SWAGGER_VISIBILITY SWAGGER_UNUSED static const char swagger_register_##C ##_i = []() {\
+        qmlRegisterType<C##_QML>("com.swagger.apis", 1, 0, #C );\
+        swagger::apis_register().insert(QStringLiteral(#C), C##_QML::staticMetaObject);\
+        return 0;}();
+#endif
 
 
 #endif

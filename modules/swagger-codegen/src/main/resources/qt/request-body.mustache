@@ -133,5 +133,11 @@ void AbstractRequest::onReplyFinished() {
     Q_EMIT done();
 }
 
+
+AbstractRequest::Error QmlRequest::processResponse(int status, const QJsonValue & data) {
+    Q_EMIT finished(status, data.toVariant());
+    return NoError;
+}
+
 }
 

@@ -56,8 +56,12 @@ boost::optional<{{classname}}> {{classname}}::unserialize(const QJsonObject & js
     }{{#required}}
     else return {};{{/required}}{{/vars}}
     return obj;
+
 }
 
+#ifdef QT_QML_LIB
+SWAGGER_REGISTER_QML_ENTITY({{classname}});
+#endif 
 } /* namespace Swagger */
 
 {{/model}}

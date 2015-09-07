@@ -12,6 +12,7 @@ public class CodegenOperation {
     returnContainer, summary, notes, baseName, defaultResponse;
 
   public Boolean hasPathParams, hasFormParams, hasBodyParams, hasQueryParams, hasHeaderParams;
+  public Boolean hasUniqueSuccessResponse, hasUniqueErrorResponse;
 
   public List<Map<String, String>> consumes, produces;
   public CodegenParameter bodyParam;

@@ -724,6 +724,10 @@ public class DefaultCodegen {
     if (operation.getResponses() != null && !operation.getResponses().isEmpty()) {
       Response methodResponse = findMethodResponse(operation.getResponses());
 
+
+      int errorResponse = 0;
+      int successResponse = 0;
+      CodegenResponse errorResponseRef = null, successResponseRef = null;
       for (Map.Entry<String, Response> entry : operation.getResponses().entrySet()) {
         Response response = entry.getValue();
         CodegenResponse r = fromResponse(entry.getKey(), response);
@@ -733,9 +737,33 @@ public class DefaultCodegen {
             !languageSpecificPrimitives.contains(r.baseType))
           imports.add(r.baseType);
         r.isDefault = response == methodResponse;
+
+        int code;
+        if(r.code.equals("default"))
+          code = 0;
+        else
+          code = Integer.parseInt(r.code);
+        if(code >= 200 && code < 400) {
+          successResponse++;
+          successResponseRef = r;
+        }
+        else if(code != 0) {
+          errorResponse++;
+          errorResponseRef = r;
+        }
         op.responses.add(r);
       }
       op.responses.get(op.responses.size() - 1).hasMore = false;
+      if(errorResponseRef != null && errorResponse > 0) {
+        errorResponseRef.isUniqueError = true;
+        op.hasUniqueErrorResponse = true;
+      }
+      if(successResponseRef != null && successResponse > 0) {
+        successResponseRef.isUniqueSuccess = true;
+        op.hasUniqueSuccessResponse = true;
+      }
+      if(op.responses.size() == 1)
+        op.responses.get(0).isUnique = true;
 
     if(methodResponse != null) {
       if (methodResponse.getSchema() != null) {

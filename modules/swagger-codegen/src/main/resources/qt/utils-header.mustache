@@ -391,69 +391,19 @@ namespace details {
 
 }
 
-#define SWAGGER_SMART_SLOT(Api, Type, HttpCode)                                             \
+#define SWAGGER_SMART_SLOT(Api, Type, HttpCode, FunctionName)                                \
 template <typename Func>                                                                     \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && Api ## RequestDetails::Arities::success == 1                                          \
-    && Api ## RequestDetails::ResponseInfo<Type>::isSuccess::value, Api ## Request*>::type   \
-onSuccess(Func func) {                                                                       \
+typename std::enable_if<details::slot_match<Func,Type>::value, Api ## Request*>::type        \
+FunctionName(Func func) {                                                                    \
     connect(this, &Api ## Request::finished ## HttpCode, func);                              \
     return this;                                                                             \
 }                                                                                            \
 template <typename Obj, typename Func>                                                       \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && Api ## RequestDetails::Arities::success == 1                                          \
-    && Api ## RequestDetails::ResponseInfo<Type>::isSuccess::value, Api ## Request*>::type   \
-onSuccess(Obj obj, Func func) {                                                              \
+typename std::enable_if<details::slot_match<Func,Type>::value, Api ## Request*>::type        \
+FunctionName(Obj obj, Func func) {                                                           \
     connect(this, &Api ## Request::finished ## HttpCode, obj, func);                         \
     return this;                                                                             \
 }                                                                                            \
-template <typename Func>                                                                     \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && (Api ## RequestDetails::Arities::error == 1                                           \
-    && !Api ## RequestDetails::ResponseInfo<Type>::isSuccess::value), Api ## Request*>::type \
-onError(Func func) {                                                                         \
-    connect(this, &Api ## Request::finished ## HttpCode, func);                              \
-    return this;                                                                             \
-}                                                                                            \
-template <typename Obj,typename Func>                                                        \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && (Api ## RequestDetails::Arities::error == 1                                           \
-    && !Api ## RequestDetails::ResponseInfo<Type>::isSuccess::value), Api ## Request*>::type \
-onError(Obj obj, Func func) {                                                                \
-    connect(this, &Api ## Request::finished ## HttpCode, obj, func);                         \
-    return this;                                                                             \
-}                                                                                            \
-template <typename Func>                                                                     \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && (Api ## RequestDetails::ResponseInfo<Type>::isDefault::value                          \
-       || Api ## RequestDetails::Arities::total == 1), Api ## Request*>::type                \
-onFinished(Func func) {                                                                      \
-    connect(this, &Api ## Request::finished  ## HttpCode, func);                             \
-    return this;                                                                             \
-}                                                                                            \
-template <typename Obj, typename Func>                                                       \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && (Api ## RequestDetails::ResponseInfo<Type>::isDefault::value                          \
-       || Api ## RequestDetails::Arities::total == 1), Api ## Request*>::type                \
-onFinished(Obj obj, Func func) {                                                             \
-    connect(this, &Api ## Request::finished  ## HttpCode, obj, func);                        \
-    return this;                                                                             \
-}                                                                                            \
-template <typename Func>                                                                     \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && !Api ## RequestDetails::ResponseInfo<Type>::isDefault::value, Api ## Request*>::type  \
-on ## HttpCode (Func func) {                                                                 \
-    connect(this, &Api ## Request::finished  ## HttpCode, func);                             \
-    return this;                                                                             \
-}                                                                                            \
-template <typename Obj, typename Func>                                                       \
-typename std::enable_if<details::slot_match<Func,Type>::value                                \
-    && !Api ## RequestDetails::ResponseInfo<Type>::isDefault::value, Api ## Request*>::type  \
-on ## HttpCode (Obj obj, Func func) {                                                        \
-    connect(this, &Api ## Request::finished  ## HttpCode, obj, func);                        \
-    return this;                                                                             \
-}
 
 #define SWAGGER_DECLARE_MODEL(m) template <> struct is_model<m> : std::true_type {}
 

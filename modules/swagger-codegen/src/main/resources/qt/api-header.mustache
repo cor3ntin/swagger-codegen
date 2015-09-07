@@ -39,60 +39,6 @@ Sender<responses::{{operationId}}Request> {{operationId}}(AbstractApiInvoker* in
 
 {{#operations}}
 namespace responses {
-{{#operation}}
-namespace {{operationId}}RequestDetails {
-    template  <typename T>
-    struct ResponseInfo {};
-    {{#responses}}
-    {{#dataType}}
-    template  <>
-    struct ResponseInfo<{{{dataType}}}> {
-        enum { code = {{code}} };
-        using isDefault = std::integral_constant<bool, {{code}} == 0>;
-        using isSuccess = std::integral_constant<bool, ({{code}} >= 200 && {{code}} < 400)>;
-    };{{/dataType}}{{^dataType}}
-    template  <>
-    struct ResponseInfo<void> {
-        enum { code = {{code}} };
-        using isDefault = std::integral_constant<bool, {{code}} == 0>;
-        using isSuccess = std::integral_constant<bool, ({{code}} >= 200 && {{code}} < 400)>;
-    };{{/dataType}}
-    {{/responses}}
-    namespace details {
-        template <typename... Args> struct Count;
-        template <>
-        struct Count<> {
-            using success  = std::integral_constant<int, 0>;
-            using failure  = std::integral_constant<int, 0>;
-        };
-
-        template <typename A1>
-        struct Count<A1> {
-            using success  = typename std::integral_constant<int, ((ResponseInfo<A1>::isSuccess::value && !ResponseInfo<A1>::isDefault::value) ? 1 : 0)>;
-            using failure  = typename std::integral_constant<int, ((!ResponseInfo<A1>::isSuccess::value && !ResponseInfo<A1>::isDefault::value) ? 1 : 0)>;
-        };
-
-        template <typename A1, typename A2, typename... Args>
-        struct Count<A1, A2, Args...> {
-            using success  = std::integral_constant<int, Count<Args...>::success::value
-                + Count<A1>::success::value + Count<A2>::success::value  >;
-            using failure  = typename std::integral_constant<int, Count<Args...>::failure::value
-                + Count<A1>::failure::value + Count<A2>::failure::value  >;
-        };
-        template <typename... Args>
-        struct Arities {
-            enum  {
-                total = sizeof...(Args),
-                success = Count<Args...>::success::value,
-                error = Count<Args...>::failure::value,
-            };
-            using hasDefault = std::integral_constant<bool, total != success+error>;
-
-        };
-    }
-    using Arities = details::Arities<{{#responses}}{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}{{#hasMore}},{{/hasMore}}{{/responses}}>;
-}
-{{/operation}}
 
 {{#operation}}
 class {{operationId}}Request : public AbstractRequest {
@@ -111,7 +57,10 @@ Q_SIGNALS:
 
 public:
 {{#responses}}
-    SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}})
+    {{#isUnique}}SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}}, onFinished){{/isUnique}}
+    {{#isUniqueSuccess}}SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}}, onSuccess){{/isUniqueSuccess}}
+    {{#isUniqueError}}SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}}, onError){{/isUniqueError}}
+    {{^isUnique}}SWAGGER_SMART_SLOT({{operationId}},{{#dataType}}{{{dataType}}}{{/dataType}}{{^dataType}}void{{/dataType}}, {{code}}, on{{code}}){{/isUnique}}
 {{/responses}}
     template <typename... Args>
     {{operationId}}Request* then(Args... args) {
